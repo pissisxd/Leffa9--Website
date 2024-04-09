@@ -27,34 +27,50 @@ const ProfileDetails = ({ user }) => {
 
 //Viimeksi kirjautunu
 useEffect(() => {
-    const fetchLastLogin = async () => {
+    const fetchLastLoggedIn = async () => {
         try {
-            const response = await axios.get(`/profile/timestamp/${profilename}`);
-            setLastLoggedIn(response.data);
+            const timestamp = await axios.get(`http://localhost:3001/profile/${timestamp}`);
+            if (timestamp) { 
+                setLastLoggedIn(timestamp);
+            }
         } catch (error) {
-            console.error('Virhe haettaessa viimeisintä kirjautumista:', error);
+            console.error('Virhe haettaessa kirjautumisaikaa:', error.message);
         }
     };
 
-    fetchLastLogin();
-}, [profilename]);
+    fetchLastLoggedIn();
+}, []);
+const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const hours = ('0' + date.getHours()).slice(-2);
+    const minutes = ('0' + date.getMinutes()).slice(-2);
+    const seconds = ('0' + date.getSeconds()).slice(-2);
+    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+};
 
 const isOwnProfile = user && profile && user.username === profile.username;
 
     return (
         <div className="content">
+
             <div className="inner-view">
                 <div className="inner-left">
                     <img src={profile?.profilepicurl || ''} className="profilepic" alt="Käyttäjän kuva" />
-                    {lastLoggedIn !== null ? (<p>Viimeisin kirjautuminen: {lastLoggedIn}</p>):(<p>Viimeisintä kirjautumista ei löytynyt</p>)}
                     <br />
+                    {(!profile?.is_private || isOwnProfile) && <span className='userinfo'>Viimeksi kirjautuneena: {formatDate(lastLoggedIn)}</span>}
+
                     {isOwnProfile && <Link to={`/profile/${profilename}/edit`} className="basicbutton">Muokkaa profiilia</Link>}
                 </div>
 
                 <div className="inner-right">
-                    <h2>{profile?.profilename}</h2>
-                    {(!profile?.is_private || isOwnProfile) && <p className="info">{profile?.description || ''} </p>}
-                    {profile?.is_private && !isOwnProfile && <span className="userinfo">Tämä profiili on yksityinen.</span>}
+                <h2>{profile?.profilename}</h2>
+                    <ul>
+                        {(!profile?.is_private || isOwnProfile) && <p className="info">{profile?.description || ''} </p>}
+                        {profile?.is_private && !isOwnProfile && <span className="userinfo">Tämä profiili on yksityinen.</span>}
+                    </ul>
                 </div>
             </div>
 
@@ -62,17 +78,19 @@ const isOwnProfile = user && profile && user.username === profile.username;
         
             <div className="three-view">
                 <div className="three-left">
-                    <h2>Suosikit</h2>
+                    <h2>Suosikit &nbsp;<span className='emoji uni10'></span></h2>
                     <ul>
-                        {/*ehkä vaikka tähän*/}
+                        <li><span className='userinfo'>Ei vielä suosikkeja</span></li>
                     </ul>
                 </div>
 
                 <div className="three-middle">
+                <h2>Ryhmät &nbsp;<span className='emoji uni07'></span></h2>  
                     <GroupList profile={profile} />
                 </div>
 
                 <div className="three-right">
+                <h2>Arvostelut  &nbsp;<span className='emoji uni08'></span></h2>
                     <ReviewList profile={profile}/>
                 </div>
             </div>}

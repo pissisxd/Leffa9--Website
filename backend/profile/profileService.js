@@ -44,19 +44,12 @@ async function updateProfileById(profileid, profilename, email, profilepicurl, d
         return { success: false, message: error.message };
     }
 }
-async function getProfileTimestamp(profileId) {
-  try {
-    const profile = await Profile.findOne({ profileid: profileId });
-    return {success: true, message: error.timestamp};
-  } catch (error) {
-    return {success: false, message: error.mesage};
-  }
-}
+
+
 module.exports = {
     getAllProfiles,
     getProfileById,
     getProfileByName,
     deleteProfileById,
     updateProfileById,
-    getProfileTimestamp
 };

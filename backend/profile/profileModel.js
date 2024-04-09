@@ -17,7 +17,7 @@ async function getProfileById(profileId) {
 
 async function getProfileByName(profilename) {
     const query = {
-        text: 'SELECT profileid, profilename, email, profilepicurl, timestamp, description, is_private FROM Profile_ WHERE profilename = $1',
+        text: 'SELECT profileid, profilename, email, profilepicurl, timestamp, description, is_private FROM profile_ WHERE profilename = $1',
         values: [profilename],
     };
 
@@ -43,21 +43,6 @@ async function updateProfileById(profileid, profilename, email, profilepicurl, d
     const result = await pool.query(query);
     return result.rowCount;
 }
-async function getProfileTimestamp(profileId) {
-    try {
-      const query = {
-        text: 'SELECT timestamp FROM profile_ WHERE profileid = $1',
-        values: [profileId],
-      };
-      const result = await pool.query(query);
-      if (result.rows.length === 0) {
-        return null; // Palauta null, jos profiilia ei löydy
-      }
-      return result.rows[0].timestamp;
-    } catch (error) {
-      throw new Error('Virhe haettaessa profiilitietoja: ' + error.message);
-    }
-  }
 
 module.exports = {
     getAllProfiles,
@@ -65,5 +50,4 @@ module.exports = {
     getProfileByName,
     deleteProfileById,
     updateProfileById,
-    getProfileTimestamp
 };
