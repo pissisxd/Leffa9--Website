@@ -54,4 +54,17 @@ router.put('/profile/:profileid', async (req, res) => {
     }
 });
 
+router.get('/profile/:timestamp', async (req, res) => {
+    const profileId = req.params.profileid;
+    try {
+      const timestamp = await profileService.getProfileTimestamp(profileId);
+      if (timestamp === null) {
+        return res.status(404).json({ error: 'Profiilia ei löydy' });
+      }
+      res.json({ timestamp });
+    } catch (error) {
+      console.error('Virhe haettaessa profiilitietoja:', error);
+      res.status(500).json({ error: 'Virhe haettaessa profiilitietoja' });
+    }
+  });
 module.exports = router;

@@ -43,11 +43,27 @@ async function updateProfileById(profileid, profilename, email, profilepicurl, d
     const result = await pool.query(query);
     return result.rowCount;
 }
+async function getProfileTimestamp(profileId) {
+    try {
+      const query = {
+        text: 'SELECT timestamp FROM profile_ WHERE profileid = $1',
+        values: [profileId],
+      };
+      const result = await pool.query(query);
+      if (result.rows.length === 0) {
+        return null; // Palauta null, jos profiilia ei löydy
+      }
+      return result.rows[0].timestamp;
+    } catch (error) {
+      throw new Error('Virhe haettaessa profiilitietoja: ' + error.message);
+    }
+  }
 
 module.exports = {
     getAllProfiles,
     getProfileById,
     getProfileByName,
     deleteProfileById,
-    updateProfileById
+    updateProfileById,
+    getProfileTimestamp
 };

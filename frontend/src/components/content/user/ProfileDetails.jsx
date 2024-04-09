@@ -27,13 +27,17 @@ const ProfileDetails = ({ user }) => {
 
 //Viimeksi kirjautunu
 useEffect(() => {
-    const simulateLogin = async () => {
-        const timestamp = new Date().toLocaleString();
-        setLastLoggedIn(timestamp);
+    const fetchLastLogin = async () => {
+        try {
+            const response = await axios.get(`/profile/timestamp/${profilename}`);
+            setLastLoggedIn(response.data);
+        } catch (error) {
+            console.error('Virhe haettaessa viimeisintä kirjautumista:', error);
+        }
     };
 
-    simulateLogin();
-}, [user]);
+    fetchLastLogin();
+}, [profilename]);
 
 const isOwnProfile = user && profile && user.username === profile.username;
 
@@ -42,7 +46,7 @@ const isOwnProfile = user && profile && user.username === profile.username;
             <div className="inner-view">
                 <div className="inner-left">
                     <img src={profile?.profilepicurl || ''} className="profilepic" alt="Käyttäjän kuva" />
-                    <span>Viimeksi kirjautuneena: {lastLoggedIn}</span>
+                    {lastLoggedIn !== null ? (<p>Viimeisin kirjautuminen: {lastLoggedIn}</p>):(<p>Viimeisintä kirjautumista ei löytynyt</p>)}
                     <br />
                     {isOwnProfile && <Link to={`/profile/${profilename}/edit`} className="basicbutton">Muokkaa profiilia</Link>}
                 </div>

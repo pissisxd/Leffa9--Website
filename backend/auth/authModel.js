@@ -17,8 +17,9 @@ async function createUser(username, hashedpassword, email) {
     await pool.query(query);
 }
 
+
+
 module.exports = {
     getUserByUsername,
     createUser,
-
 };

@@ -18,6 +18,7 @@ import MovieDetails from '@content/movies/MovieDetails';
 import Community from '@content/community/Community';
 import Error from '@content/error/Error';
 import { jwtToken } from './components/auth/authSignal';
+import ScrollToTop from '@content/homepage/ScrollToTop';
 // importtaa muut sivut
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
           <div className={`body ${theme}`}>
               <Error />
               <Header user={user} setUser={handleLogin} handleLogout={handleLogout} />  
+              <ScrollToTop />
             <Routes>
               <Route path="/" exact element={<Home />} />
               <Route path="/search" element={<Search />} />
