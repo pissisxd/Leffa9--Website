@@ -9,7 +9,7 @@ import ProfileEdit from './ProfileEdit';
 const ProfileDetails = ({ user }) => {
     const [profile, setProfile] = useState(null);
     const { profilename } = useParams();
-    const [lastLoggedIn, setLastLoggedIn] = useState(null);
+    const [lastLoggedIn, setLastLoggedIn] = useState('');
     const [editMode, setEditMode] = useState(false); 
     const [isOwnProfile, setOwnProfile] = useState(false);
     const [isPrivate, setPrivate] = useState(false);
@@ -41,42 +41,29 @@ const ProfileDetails = ({ user }) => {
     
         fetchProfile();
     }, [profilename]);
-
+// viimeksi kirjautunu
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        const hours = ('0' + date.getHours()).slice(-2);
+        const minutes = ('0' + date.getMinutes()).slice(-2); 
+    
+        return `${day}.${month}.${year}  ${hours}:${minutes}`;
+    };
     useEffect(() => {
-        const simulateLogin = async () => {
-            const timestamp = new Date().toLocaleString();
-            setLastLoggedIn(timestamp);
+        const fetchLastLoggedIn = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3001/profile/timestamp/${profilename}`);
+                setLastLoggedIn(response.data.timestamp);
+            } catch (error) {
+                console.error('Virhe haettaessa viimeistä kirjautumisaikaa:', error);
+            }
         };
 
-//Viimeksi kirjautunu
-useEffect(() => {
-    const fetchLastLoggedIn = async () => {
-        try {
-            const timestamp = await axios.get(`http://localhost:3001/profile/${timestamp}`);
-            if (timestamp) { 
-                setLastLoggedIn(timestamp);
-            }
-        } catch (error) {
-            console.error('Virhe haettaessa kirjautumisaikaa:', error.message);
-        }
-    };
-
-    fetchLastLoggedIn();
-}, []);
-const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    const hours = ('0' + date.getHours()).slice(-2);
-    const minutes = ('0' + date.getMinutes()).slice(-2);
-    const seconds = ('0' + date.getSeconds()).slice(-2);
-    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
-};
-
-const isOwnProfile = user && profile && user.username === profile.username;
-        simulateLogin();
-    }, [user]);
+        fetchLastLoggedIn();
+    }, [profilename]);
 
     const handleEditClick = () => {
         setEditMode(true); 

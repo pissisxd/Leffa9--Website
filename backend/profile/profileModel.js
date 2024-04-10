@@ -53,12 +53,12 @@ async function updateProfileDetails(profileid, profilepicurl, description) {
     const result = await pool.query(query);
     return result.rowCount;
 }
-
 module.exports = {
     getAllProfiles,
     getProfileById,
     getProfileByName,
     deleteProfileById,
     updateProfileById,
-    updateProfileDetails
+    updateProfileDetails,
+
 };

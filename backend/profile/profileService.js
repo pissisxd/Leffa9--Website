@@ -1,4 +1,5 @@
 const profileModel = require('./profileModel');
+const pool = require('../database/db_connection');
 
 async function getAllProfiles() {
     try {
@@ -64,5 +65,5 @@ module.exports = {
     getProfileByName,
     deleteProfileById,
     updateProfileById,
-    updateProfileDetails
+    updateProfileDetails,
 };
