@@ -8,6 +8,7 @@ import '@css/emoji.css';
 import '@css/theme.css';
 import Header from '@components/header/Header';
 import Footer from '@components/footer/Footer';
+import ScrollToTop from '@components/scrolling/ScrollToTop';
 import Home from '@content/homepage/Home';
 import Login from '@components/header/Login';
 import Loginx from '@components/header/Loginx';
@@ -17,6 +18,7 @@ import Search from '@content/movies/Search';
 import MovieDetails from '@content/movies/MovieDetails';
 import Community from '@content/community/Community';
 import Error from '@content/error/Error';
+import ProfileEdit from '@content/user/ProfileEdit';
 import { jwtToken } from './components/auth/authSignal';
 import ScrollToTop from '@content/homepage/ScrollToTop';
 // importtaa muut sivut
@@ -27,12 +29,20 @@ function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
   
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       toggleTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
   }, []);
 
@@ -48,6 +58,7 @@ function App() {
       .then(response => {
         if (response.ok) {
           setUser(null);
+          localStorage.removeItem('user');
           jwtToken.value = '';
         } else {
           console.error('Uloskirjautuminen epäonnistui');
@@ -61,8 +72,10 @@ function App() {
   return (
     <>
       <Router>
-
+      
         <ThemeProvider>
+        <ScrollToTop />
+
           <div className={`body ${theme}`}>
               <Error />
               <Header user={user} setUser={handleLogin} handleLogout={handleLogout} />  
@@ -75,10 +88,10 @@ function App() {
               <Route path="/loginx" element={<Loginx setUser={handleLogin} />} />
               <Route path="/myaccount" element={<MyAccount user={user} />} />
               <Route path="/profile/:profilename" element={<ProfileDetails user={user} />} />
+              <Route path="/profile/:profilename/edit" element={<ProfileEdit />} />
               <Route path="/community" element={<Community />} />
-              {/****** Loput routet, esim.
-            <Route path="/group/" element={<GroupDetails/>} />
-            ********/}
+              {/*<Route path="/group/" element={<GroupDetails/>} /> */}
+              {/* ja loput puuttuvat routet myös */}
             </Routes>
             
             </div>
