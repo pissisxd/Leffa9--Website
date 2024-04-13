@@ -57,5 +57,5 @@ async function getProfileIdByName(profilename) {
 module.exports = {
     registerUser,
     loginUser,
-    getProfileIdByName
+    getProfileIdByName,
 };

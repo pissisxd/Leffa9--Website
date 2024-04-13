@@ -5,11 +5,11 @@ import { useParams, Link } from 'react-router-dom';
 import GroupList from './GroupList';
 import ReviewList from './ReviewList';
 import ProfileEdit from './ProfileEdit'; 
+import SimpleDateTime from 'react-simple-timestamp-to-date';
 
 const ProfileDetails = ({ user }) => {
     const [profile, setProfile] = useState(null);
     const { profilename } = useParams();
-    const [lastLoggedIn, setLastLoggedIn] = useState(null);
     const [editMode, setEditMode] = useState(false); 
     const [isOwnProfile, setOwnProfile] = useState(false);
     const [isPrivate, setPrivate] = useState(false);
@@ -42,23 +42,6 @@ const ProfileDetails = ({ user }) => {
         fetchProfile();
     }, [profilename]);
 
-    useEffect(() => {
-        const simulateLogin = async () => {
-            const timestamp = new Date().toLocaleString();
-            setLastLoggedIn(timestamp);
-        };
-
-        simulateLogin();
-    }, [user]);
-
-    const formatDate = (timestamp) => {
-        const date = new Date(timestamp);
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        return `${day}.${month}.${year}`;
-    };
-
     const handleEditClick = () => {
         setEditMode(true); 
     };
@@ -68,8 +51,7 @@ const ProfileDetails = ({ user }) => {
             <div className="inner-view">
                 <div className="inner-left">
                     <img src={profile?.profilepicurl || ''} className="profilepic" alt="Käyttäjän kuva" />
-                    {(!isPrivate || isOwnProfile) && <span className='userinfo'>Viimeksi kirjautuneena: {formatDate(lastLoggedIn)}</span>}
-
+                    {!isPrivate && <p>Viimeksi kirjautunut <br></br><DatabaseDateTime /></p>}
                     {(isOwnProfile && !editMode) && <button onClick={handleEditClick} className="basicbutton">Muokkaa profiilia</button>}
                 </div>
 
@@ -106,6 +88,32 @@ const ProfileDetails = ({ user }) => {
             )}
         </div>
     );
+    
 };
 
+// viimeksi kirjautunu
+const DatabaseDateTime = () => {
+    const [dateTimeFromDatabase, setDateTimeFromDatabase] = useState('');
+    const { profilename } = useParams();
+    useEffect(() => {
+        const fetchDateTimeFromDatabase = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3001/profile/${profilename}`);
+                const data = response.data;
+                console.log("Tietokannasta saatu timestamp:", data); 
+                setDateTimeFromDatabase(data.timestamp);
+            } catch (error) {
+                console.error('Virhe haettaessa päivämäärää ja aikaa tietokannasta:', error);
+            }
+        };
+
+        fetchDateTimeFromDatabase();
+    }, []);
+
+    return (
+        <SimpleDateTime dateSeparator="-" timeSeparator=":">
+            {dateTimeFromDatabase}
+        </SimpleDateTime>
+    );
+};
 export default ProfileDetails;
