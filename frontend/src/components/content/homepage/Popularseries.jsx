@@ -5,8 +5,8 @@ import './Homepage.css';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
 
-const PopularMovies = () => {
-  const [movies, setMovies] = useState([]);
+const PopularSeries = () => {
+  const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hoveredEventIndex, setHoveredEventIndex] = useState(-1);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
@@ -14,19 +14,19 @@ const PopularMovies = () => {
   const [intervalId, setIntervalId] = useState(null); // Lisätty intervalId
 
   useEffect(() => {
-    fetchPopularMovies();
+    fetchPopularSeries();
   }, []);
 
-  const fetchPopularMovies = async () => {
+  const fetchPopularSeries = async () => {
     try {
-      const response = await axios.get(`${VITE_APP_BACKEND_URL}/movie/discover`, {
+      const response = await axios.get(`${VITE_APP_BACKEND_URL}/series/discover`, {
         params: {
           sort_by: 'popularity.desc'
 
         }
       });
-      const popularMovies = response.data;
-      setMovies(popularMovies);
+      const popularSeries = response.data;
+      setSeries(popularSeries);
       setLoading(false);
     } catch (error) {
       console.error('Hakuvirhe:', error);
@@ -35,12 +35,12 @@ const PopularMovies = () => {
   };
 
   useEffect(() => {
-    setVisibleEvents(movies.slice(currentEventIndex, currentEventIndex + 5));
-  }, [currentEventIndex, movies]);
+    setVisibleEvents(series.slice(currentEventIndex, currentEventIndex + 5));
+  }, [currentEventIndex, series]);
 
   const handleNext = () => {
     if (hoveredEventIndex === -1) {
-      setCurrentEventIndex(prevIndex => Math.min(prevIndex + 1, movies.length - 5));
+      setCurrentEventIndex(prevIndex => Math.min(prevIndex + 1, series.length - 5));
     }
   };
 
@@ -79,16 +79,16 @@ const PopularMovies = () => {
               onMouseEnter={() => handleMouseEnter(handlePrev)}
               onMouseLeave={handleMouseLeave} // Kutsu handleMouseLeave, kun hiiri poistuu
             /></div>
-          {visibleEvents.map((movie, index) => (
+          {visibleEvents.map((serie, index) => (
             <div
-              key={movie.id}
+              key={serie.id}
               className="event-item"
               onMouseEnter={() => setHoveredEventIndex(index)}
               onMouseLeave={() => setHoveredEventIndex(-1)}
             >
-              <Link to={`/movie/${movie.id}`} className="link-style">
-                <img src={movie.poster_path} alt={movie.title} />
-                <div className="head">{movie.title}</div>
+              <Link to={`/series/${serie.id}`} className="link-style">
+                <img src={serie.poster_path} alt={serie.title} />
+                <div className="head">{serie.title}</div>
               </Link>
             </div>
           ))}
@@ -106,4 +106,4 @@ const PopularMovies = () => {
   );
 };
 
-export default PopularMovies;
+export default PopularSeries;

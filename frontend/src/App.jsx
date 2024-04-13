@@ -15,20 +15,25 @@ import MyAccount from '@content/user/MyAccount';
 import ProfileDetails from '@content/user/ProfileDetails';
 import Search from '@content/movies/Search';
 import MovieDetails from '@content/movies/MovieDetails';
+import GroupDetails from '@content/group/GroupDetails';
+import SeriesDetails from '@content/movies/SeriesDetails';
 import Community from '@content/community/Community';
 import Error from '@content/error/Error';
 import ProfileEdit from '@content/user/ProfileEdit';
+import Faq from '@content/faq/Faq';
 import { jwtToken } from './components/auth/authSignal';
+const { VITE_APP_BACKEND_URL } = import.meta.env;
+
 
 function App() {
   const { theme, toggleTheme } = useTheme();
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
 
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
-  
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
@@ -48,7 +53,7 @@ function App() {
   }, [theme]);
 
   const handleLogout = () => {
-    fetch('http://localhost:3001/auth/logout', {
+    fetch(`${VITE_APP_BACKEND_URL}/auth/logout`, {
       method: 'GET',
       credentials: 'include',
     })
@@ -57,6 +62,7 @@ function App() {
           setUser(null);
           localStorage.removeItem('user');
           jwtToken.value = '';
+          window.location.href = '/';
         } else {
           console.error('Uloskirjautuminen epäonnistui');
         }
@@ -69,28 +75,30 @@ function App() {
   return (
     <>
       <Router>
-      
+
         <ThemeProvider>
-        <ScrollToTop />
+          <ScrollToTop />
 
           <div className={`body ${theme}`}>
-              <Error />
-              <Header user={user} setUser={handleLogin} handleLogout={handleLogout} />  
+            <Error />
+            <Header user={user} setUser={handleLogin} handleLogout={handleLogout} toggleTheme={toggleTheme} theme={theme} />
             <Routes>
               <Route path="/" exact element={<Home />} />
               <Route path="/search" element={<Search />} />
               <Route path="/movie/:id" element={<MovieDetails />} />
+              <Route path="/series/:id" element={<SeriesDetails />} />
               <Route path="/login" element={<Login setUser={handleLogin} />} />
               <Route path="/myaccount" element={<MyAccount user={user} />} />
               <Route path="/profile/:profilename" element={<ProfileDetails user={user} />} />
               <Route path="/profile/:profilename/edit" element={<ProfileEdit />} />
               <Route path="/community" element={<Community />} />
-              {/*<Route path="/group/" element={<GroupDetails/>} /> */}
+              <Route path="/about" element={<Faq />} />
+              <Route path="/group/:id" element={<GroupDetails user={user} />} />
               {/* ja loput puuttuvat routet myös */}
             </Routes>
-            
-            </div>
-            <Footer toggleTheme={toggleTheme} theme={theme} />
+
+          </div>
+          <Footer toggleTheme={toggleTheme} theme={theme} />
         </ThemeProvider>
       </Router>
     </>

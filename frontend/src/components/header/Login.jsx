@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtToken } from '../auth/authSignal';
+const { VITE_APP_BACKEND_URL } = import.meta.env;
+
 
 export default function Login({ setUser, window, fullpage }) {
 
@@ -12,7 +14,7 @@ export default function Login({ setUser, window, fullpage }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/auth/login', {
+      const response = await axios.post(`${VITE_APP_BACKEND_URL}/auth/login`, {
         username: username,
         password: password
       });
@@ -28,7 +30,7 @@ export default function Login({ setUser, window, fullpage }) {
       console.error('Kirjautumisvirhe:', error);
     }
   };
-  if  (window) {
+  if (window) {
     return (
       <div className="login-window">
         <form onSubmit={handleLogin}>
@@ -44,20 +46,20 @@ export default function Login({ setUser, window, fullpage }) {
   } else {
     return (
       <div className='content'>
-        
+
         <div className="login-view">
           <h2>Kirjautuminen</h2>
           <div className="full-page">
-            <span className="userinfo">Älä koskaan jaa käyttäjätunnustasi ja salasanaasi muille</span><br/><br/>
+            <span className="userinfo">Älä koskaan jaa käyttäjätunnustasi ja salasanaasi muille</span><br /><br />
 
-          <form onSubmit={handleLogin}>
-            Käyttäjätunnus: <br/>
-            <input className="field" value={username} onChange={e => setUsername(e.target.value)} placeholder="Käyttäjänimi"></input>
-            <br/><br/>
-            Salasana: <br/>
-            <input className="field" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Salasana"></input> <br/>
-            <button className="basicbutton" type="submit">Kirjaudu sisään</button>
-          </form>
+            <form onSubmit={handleLogin}>
+              Käyttäjätunnus: <br />
+              <input className="field" value={username} onChange={e => setUsername(e.target.value)} placeholder="Käyttäjänimi"></input>
+              <br /><br />
+              Salasana: <br />
+              <input className="field" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Salasana"></input> <br />
+              <button className="basicbutton" type="submit">Kirjaudu sisään</button>
+            </form>
           </div>
         </div>
 
@@ -74,8 +76,8 @@ export default function Login({ setUser, window, fullpage }) {
             <p>Placeholder</p>
           </div>
         </div>
-          
+
       </div>
     );
-  } 
+  }
 }

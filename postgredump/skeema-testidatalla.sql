@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS Review_ CASCADE;
 CREATE TABLE IF NOT EXISTS Profile_
 (
     profileid SERIAL PRIMARY KEY,
-    profilename VARCHAR(255) UNIQUE NOT NULL,
+    profilename VARCHAR(40) UNIQUE NOT NULL,
     hashedpassword VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     profilepicurl text COLLATE pg_catalog."default",
@@ -510,9 +510,33 @@ INSERT INTO Review_ (profileid, revieweditem, review, rating, "timestamp") VALUE
 ('23', '76600', 'Jännittävä!', 4, CURRENT_TIMESTAMP),
 ('23', '373571', 'Paras!', 5, CURRENT_TIMESTAMP),
 ('24', '1022796', 'Ei suositeltava', 2, CURRENT_TIMESTAMP),
-('24', '695721', 'Viihdyttävä', 4, CURRENT_TIMESTAMP);
+('24', '695721', 'Viihdyttävä', 4, CURRENT_TIMESTAMP),
+('21', '135397', 'Aiiiiivan ihania dinosia', 4, CURRENT_TIMESTAMP),
+('21', '507086', 'Tommosen ottais lemmikiksikin', 4, CURRENT_TIMESTAMP),
+('21', '1010581', 'Se on ihan huti', 1, CURRENT_TIMESTAMP),
+('21', '346698', 'Melko PINKKI leffa oli. :) Voi Ken ressua', 5, CURRENT_TIMESTAMP),
+('21', '395990', 'Mmmmmmm........ se on jotain niiin........ rrrrr', 4, CURRENT_TIMESTAMP),
+('21', '634649', 'Ei mulle, mut ehkä sulle?', 2, CURRENT_TIMESTAMP),
+('21', '1966', 'Hieno heppi <3', 3, CURRENT_TIMESTAMP);
 
 -- yksityinen tili käyttäjille 8-14
 UPDATE Profile_
 SET is_private = TRUE
 WHERE profileid BETWEEN 8 AND 14;
+
+-- rajoite review_ -tauluun: yksi revieweditem id käyttäjällä vain kerran
+ALTER TABLE Review_
+ADD CONSTRAINT unique_review UNIQUE (profileid, revieweditem),
+ADD CONSTRAINT check_rating_range CHECK (rating >= 1 AND rating <= 5);
+
+ALTER TABLE Review_
+ADD COLUMN mediatype smallint;
+
+
+INSERT INTO Review_ (profileid, revieweditem, review, rating, "timestamp", mediatype) VALUES
+('1', '1408', 'Hyvä sarjimus', 4, CURRENT_TIMESTAMP, '1'),
+('2', '1408', 'Hyvä ', 5, CURRENT_TIMESTAMP, '1'),
+('3', '1408', 'EPIC!', 3, CURRENT_TIMESTAMP, '1'),
+('4', '1408', 'BOOM', 5, CURRENT_TIMESTAMP, '1'),
+('5', '1408', 'ihan ok!', 4, CURRENT_TIMESTAMP, '1');
+
