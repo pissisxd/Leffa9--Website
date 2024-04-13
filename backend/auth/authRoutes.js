@@ -21,6 +21,7 @@ router.post('/auth/login', async (req, res) => {
     if (result.success) {
         const profileid = await authService.getProfileIdByName(username);
         const token = jwt.sign({ username: username, profileid: profileid }, process.env.JWT_SECRET);
+        await User.findByIdAndUpdate(userId, { online: true });
         res.status(200).json({ jwtToken: token });
     } else {
         res.status(400).json({ message: result.message });
@@ -36,5 +37,16 @@ router.get('/auth/logout', async (req, res) => {
         res.status(500).json({ message: "Uloskirjautumisessa tapahtui virhe" });
     }
 });
+router.post('/auth/logout', async (req, res) => {
+    try {
+        const userId = req.user.id; 
+        await User.findByIdAndUpdate(userId, { online: false });
+        await User.findByIdAndUpdate(userId, { timestamp: new Date() });
 
+        res.status(200).json({ success: true, message: 'timestamppi päivitetty onnistuneesti' });
+    } catch (error) {
+        console.error('Virhe päivitettäessä timestamppia:', error);
+        res.status(500).json({ success: false, message: 'Virhe päivitettäessä timestamppia' });
+    }
+});
 module.exports = router;

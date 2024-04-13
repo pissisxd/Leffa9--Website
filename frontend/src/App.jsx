@@ -71,8 +71,22 @@ function App() {
       .catch(error => {
         console.error('Virhe uloskirjautuessa:', error);
       });
+      fetch(`${VITE_APP_BACKEND_URL}/auth/logout`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+    })
+    .then(response => {
+        if (response.ok) {
+        } else {
+        }
+    })
+    .catch(error => {
+        console.error('Virhe uloskirjautuessa:', error);
+    });
   }
-
   return (
     <>
       <Router>

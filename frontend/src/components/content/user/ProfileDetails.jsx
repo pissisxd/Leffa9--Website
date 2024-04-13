@@ -53,7 +53,7 @@ const ProfileDetails = ({ user }) => {
             <div className="inner-view">
                 <div className="inner-left">
                     <img src={profile?.profilepicurl || ''} className="profilepic" alt="Käyttäjän kuva" />
-                    {!isPrivate && <p>Viimeksi kirjautunut <br></br><DatabaseDateTime /></p>}
+                    {!isPrivate && (<p>{profile?.online ? 'Paikalla' : 'Viimeksi kirjautunut'}<br /><DatabaseDateTime /></p>)}
                     {(isOwnProfile && !editMode) && <button onClick={handleEditClick} className="basicbutton">Muokkaa profiilia</button>}
                 </div>
 
