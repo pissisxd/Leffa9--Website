@@ -6,7 +6,6 @@ import GroupList from './GroupList';
 import ReviewList from './ReviewList';
 import ProfileEdit from './ProfileEdit'; 
 import SimpleDateTime from 'react-simple-timestamp-to-date';
-import ProfileEdit from './ProfileEdit';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
 
