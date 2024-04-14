@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
+import ReviewFormSerie from './ReviewFormSerie';
 
 
 const SeriesDetails = () => {
@@ -107,6 +108,9 @@ const SeriesDetails = () => {
             </div>
 
             <div className="moviereviews">
+
+            <div><ReviewFormSerie tvShowId={id} /></div>
+
               <h2>Viimeisimmät arvostelut</h2>
 
               <div className="reviewslisted">
