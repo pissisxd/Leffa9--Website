@@ -26,6 +26,7 @@ import ProfileEdit from '@content/user/ProfileEdit';
 import ReviewForm from '@content/movies/ReviewForm';
 import Faq from '@content/faq/Faq';
 import { jwtToken } from './components/auth/authSignal';
+import FavoriteList from '@content/user/FavoriteList';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
 

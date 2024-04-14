@@ -5,9 +5,10 @@ const { VITE_APP_BACKEND_URL } = import.meta.env;
 
 
 const SeriesDetails = () => {
-  const { id } = useParams();
+  const { id} = useParams();
   const [series, setSeries] = useState(null);
   const [providers, setProviders] = useState(null);
+  const [profileId, setProfileId] = useState(null);
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -40,6 +41,26 @@ const SeriesDetails = () => {
     return () => clearTimeout(timeoutId);
   }, [id]);
 
+  const addToFavorites = async () => {
+    try {
+      if (series && profileId) { 
+        const response = await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, {
+          favoriteditem: series.id,
+          showtime: new Date(),
+          groupid: null,
+          profileid: profileId,
+          mediatype: 1 
+        });
+        console.log(response.data);
+      } else {
+        console.error('Sarjaa tai profiilitunnistetta ei löytynyt');
+      }
+    } catch (error) {
+      console.error('Virhe lisättäessä suosikkilistaa:', error);
+    }
+  };
+  
+
 
   return (
     <div id="backdrop" style={series && { backgroundImage: `url(https://image.tmdb.org/t/p/original${series.backdrop_path})`, backgroundSize: 'cover' }}>
@@ -50,7 +71,6 @@ const SeriesDetails = () => {
 
             <div className="moviemain">
               <img className="posterimg" src={`https://image.tmdb.org/t/p/w342${series.poster_path}`} alt={series.title} />
-
               <div className="movieinfo">
 
                 <h2>{series.name}</h2>
@@ -61,7 +81,8 @@ const SeriesDetails = () => {
                 <p><b>Tuotantoyhtiöt:</b> {series.production_companies.map(company => company.name).join(', ')}</p>
                 <p><b>Kerännyt ääniä:</b> {series.vote_count}</p>
                 <p><b>Äänten keskiarvo:</b> {series.vote_average} / 10 </p>
-
+                <button onClick={addToFavorites}>Lisää suosikkeihin</button>
+                <button onClick={() => deleteFromFavorites(series)}>Poista</button>
 
                 {providers && providers.flatrate && (
                   <table className='providers'>

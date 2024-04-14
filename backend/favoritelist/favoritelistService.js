@@ -60,25 +60,30 @@ async function getFavoritelistByGroup(req, res) {
     try {
         const now = new Date();
         let favoritelistQuery;
-        if (groupid) {
-            favoritelistQuery = {
-                text: 'INSERT INTO favoritelist_ (groupid, favoriteditem, showtime, timestamp) VALUES ($1, $2, $3, $4)',
-                values: [groupid, favoriteditem, showtime, now],
-                
-            };
-            
-        } else if (profileid) {
-            favoritelistQuery = {
-                text: 'INSERT INTO favoritelist_ (profileid, favoriteditem, showtime, timestamp) VALUES ($1, $2, $3, $4)',
-                values: [profileid, favoriteditem, showtime, now],
-            };
-        } 
-        await favoritelistModel.queryDatabase(favoritelistQuery);
-        res.status(201).send('Suosikkilista lisätty onnistuneesti');
+        
+        if (groupid || profileid) {
+            if (groupid) {
+                favoritelistQuery = {
+                    text: 'INSERT INTO favoritelist_ (groupid, favoriteditem, showtime, timestamp) VALUES ($1, $2, $3, $4)',
+                    values: [groupid, favoriteditem, showtime, now],
+                };
+            } else {
+                favoritelistQuery = {
+                    text: 'INSERT INTO favoritelist_ (profileid, favoriteditem, showtime, timestamp) VALUES ($1, $2, $3, $4)',
+                    values: [profileid, favoriteditem, showtime, now],
+                };
+            }
+            await favoritelistModel.queryDatabase(favoritelistQuery);
+            res.status(201).send('Suosikkilista lisätty onnistuneesti');
+        } else {
+            res.status(400).send('Profiili- tai ryhmätunniste puuttuu');
+        }
     } catch (error) {
         console.error('Virhe lisättäessä suosikkilistaa:', error);
+        res.status(500).send('Virhe lisättäessä suosikkilistaa');
     }
 }
+
   
     async function deleteFavoritelist(req, res) {
       const idfavoritelist = req.params.idfavoritelist;
@@ -97,10 +102,10 @@ async function getFavoritelistByGroup(req, res) {
     };
     async function getFavorite(req, res) {
       try {
-        const profileName = req.params.profileName; 
+        const profileid = req.params.profileid; 
     
-        const profileIdQuery = 'SELECT profileid FROM profile_ WHERE profilename = $1';
-        const profileIdValues = [profileName];
+        const profileIdQuery = 'SELECT profilename FROM profile_ WHERE profileid = $1';
+        const profileIdValues = [profileid];
         const profileIdResult = await profileModel.queryDatabase(profileIdQuery, profileIdValues);
         
         if (profileIdResult.length === 0) {
@@ -109,16 +114,16 @@ async function getFavoritelistByGroup(req, res) {
     
         const profileId = profileIdResult[0].profileid;
     
-        const favoriteListQuery = 'SELECT * FROM favoritelist_ WHERE profileid = $1';
+        const favoriteListQuery = 'SELECT favoriteditem FROM favoritelist_ WHERE profileid = $1';
         const favoriteListValues = [profileId];
-        const favoriteList = await favoritelistModel.queryDatabase(favoriteListQuery, favoriteListValues);
-    
-        res.json(favoriteList);
+        const favoriteListResult = await profileModel.queryDatabase(favoriteListQuery, favoriteListValues);
+
+        res.status(200).json({ favorites: favoriteListResult });
       } catch (error) {
         console.error('Virhe haettaessa suosikkilistaa:', error);
         res.status(500).json({ message: 'Virhe haettaessa suosikkilistaa' });
       }
-    };
+    }
   
   module.exports = {
     getAllFavoritelist,

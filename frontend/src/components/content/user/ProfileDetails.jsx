@@ -11,7 +11,7 @@ import SimpleDateTime from 'react-simple-timestamp-to-date';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
 
-const ProfileDetails = ({ user }) => {
+const ProfileDetails = ({ user, favorites}) => {
     const [profile, setProfile] = useState(null);
     const { profilename } = useParams();
     const [editMode, setEditMode] = useState(false); 
@@ -50,6 +50,11 @@ const ProfileDetails = ({ user }) => {
         setEditMode(true);
     };
 
+    const removeFavorite = (item) => {
+        const newFavorites = favorites.filter((favorite) => favorite.id !== item.id);
+        setFavorites(newFavorites);
+      };
+
     return (
         <div className="content">
             <div className="inner-view">
@@ -77,10 +82,7 @@ const ProfileDetails = ({ user }) => {
                         <div className="profile-view">
                             <div className="profile-content">
                                 <h2>Suosikit &nbsp;<span className='emoji uni10'></span></h2>
-                                <FavoriteList />
-                                <ul>
-                                    <li><span className='userinfo'>Ei vielä suosikkeja</span></li>
-                                </ul>
+                                <FavoriteList profile={profile} />
                             </div>
                         </div>
 
@@ -97,7 +99,7 @@ const ProfileDetails = ({ user }) => {
 
                     <div className='reviews-view'>
                         <h2>Arvostelut  &nbsp;<span className='emoji uni08'></span></h2>
-                        <ReviewList profile={profile} />
+                     
                     </div>
 
                 </>
