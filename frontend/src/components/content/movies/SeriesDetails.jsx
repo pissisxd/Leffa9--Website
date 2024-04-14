@@ -41,17 +41,21 @@ const SeriesDetails = () => {
     // Palautetaan poisto-funktio, joka suoritetaan komponentin purkamisen yhteydessä
     return () => clearTimeout(timeoutId);
   }, [id]);
+// lisätään suosikkeihin sarja
+console.log(series, profileId)
 
   const addToFavorites = async () => {
+    
     try {
       if (series && profileId) { 
         const response = await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, {
           favoriteditem: series.id,
           showtime: new Date(),
           groupid: null,
-          profileid: profileId,
+          profileId: profileId,
           mediatype: 1 
         });
+        
         console.log(response.data);
       } else {
         console.error('Sarjaa tai profiilitunnistetta ei löytynyt');
@@ -84,7 +88,6 @@ const SeriesDetails = () => {
                 <p><b>Äänten keskiarvo:</b> {series.vote_average} / 10 </p>
                 <button onClick={addToFavorites}>Lisää suosikkeihin</button>
                 <button onClick={() => deleteFromFavorites(series)}>Poista</button>
-
                 {providers && providers.flatrate && (
                   <table className='providers'>
                     <tbody>

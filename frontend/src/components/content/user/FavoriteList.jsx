@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
 const FavoriteList = ({ profile}) => {
-  
+  const isOwnProfile = profile && profile.isOwnProfile;
   const [currentPage, setCurrentPage] = useState(1);
   const [favoritesPerPage, setfavoritesPerPage] = useState(10);
 const [favorites, setFavorites] = useState([]);
@@ -62,7 +62,8 @@ const currentFavorites = favorites.slice(indexOfFirstFavorite, indexOfLastFavori
         {currentFavorites.map((favorite, index) => (
   <li key={index}>
     <Link to="#">{favorite.favoriteditem}</Link>
-    <button onClick={() => handleDeleteFavorite(favorite.idfavoritelist)}>Poista</button>
+    {isOwnProfile && (
+    <button onClick={() => handleDeleteFavorite(favorite.idfavoritelist)}>Poista</button> ) }
   </li>
 ))}
       </ul>

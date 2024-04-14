@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 import ReviewForm from './ReviewForm';
 
-const MovieDetails = ({addToFavorites, deletefromFavorites}) => {
+const MovieDetails = ({profileId}) => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [providers, setProviders] = useState(null);
@@ -69,6 +69,26 @@ const MovieDetails = ({addToFavorites, deletefromFavorites}) => {
     return () => clearTimeout(timeoutId);
   }, [id]);
 
+  //lisätään elokuva suosikkeihin
+  console.log(movie, profileId)
+  const addToFavorites = async () => {
+    try {
+      if (movie && profileId) { 
+        const response = await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist/`, {
+          favoriteditem: movie.id,
+          showtime: new Date(),
+          groupid: null,
+          profileid: profileId,
+          mediatype: 0 
+        });
+        console.log(response.data);
+      } else {
+        console.error('Elokuva tai profiilitunnistetta ei löytynyt');
+      }
+    } catch (error) {
+      console.error('Virhe lisättäessä suosikkilistaa:', error);
+    }
+  };
 
   return (
     <div id="backdrop" style={movie && { backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`, backgroundSize: 'cover' }}>
