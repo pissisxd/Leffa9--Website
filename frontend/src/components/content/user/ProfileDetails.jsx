@@ -5,6 +5,8 @@ import { useParams, Link } from 'react-router-dom';
 import GroupList from './GroupList';
 import ReviewList from './ReviewList';
 import ProfileEdit from './ProfileEdit'; 
+import FavoriteList from './FavoriteList';
+//Juurikansiossa npm install react-simple-timestamp-to-date
 import SimpleDateTime from 'react-simple-timestamp-to-date';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
@@ -75,6 +77,7 @@ const ProfileDetails = ({ user }) => {
                         <div className="profile-view">
                             <div className="profile-content">
                                 <h2>Suosikit &nbsp;<span className='emoji uni10'></span></h2>
+                                <FavoriteList />
                                 <ul>
                                     <li><span className='userinfo'>Ei vielä suosikkeja</span></li>
                                 </ul>

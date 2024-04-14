@@ -8,5 +8,6 @@ router.get('/favoritelist/profile/:profileid', favoritelistService.getFavoriteli
 router.get('/favoritelist/group/:groupid', favoritelistService.getFavoritelistByGroup);
 router.post('/favoritelist', favoritelistService.createFavoritelist);
 router.delete('/favoritelist/:idfavoritelist', favoritelistService.deleteFavoritelist);
+router.get('/favoritelist/profileid/favoriteditem', favoritelistService.getFavorite);
 
 module.exports = router;

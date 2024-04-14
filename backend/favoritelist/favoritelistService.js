@@ -95,7 +95,30 @@ async function getFavoritelistByGroup(req, res) {
         res.status(500).send('Virhe poistettaessa listaa');
       }
     };
+    async function getFavorite(req, res) {
+      try {
+        const profileName = req.params.profileName; 
     
+        const profileIdQuery = 'SELECT profileid FROM profile_ WHERE profilename = $1';
+        const profileIdValues = [profileName];
+        const profileIdResult = await profileModel.queryDatabase(profileIdQuery, profileIdValues);
+        
+        if (profileIdResult.length === 0) {
+          return res.status(404).json({ message: 'Profiilia ei löytynyt' });
+        }
+    
+        const profileId = profileIdResult[0].profileid;
+    
+        const favoriteListQuery = 'SELECT * FROM favoritelist_ WHERE profileid = $1';
+        const favoriteListValues = [profileId];
+        const favoriteList = await favoritelistModel.queryDatabase(favoriteListQuery, favoriteListValues);
+    
+        res.json(favoriteList);
+      } catch (error) {
+        console.error('Virhe haettaessa suosikkilistaa:', error);
+        res.status(500).json({ message: 'Virhe haettaessa suosikkilistaa' });
+      }
+    };
   
   module.exports = {
     getAllFavoritelist,
@@ -103,4 +126,5 @@ async function getFavoritelistByGroup(req, res) {
     deleteFavoritelist,
     getFavoritelistByProfile,
     getFavoritelistByGroup,
+    getFavorite,
   };

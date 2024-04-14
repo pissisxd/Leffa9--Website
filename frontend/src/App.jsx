@@ -72,7 +72,6 @@ function App() {
         console.error('Virhe uloskirjautuessa:', error);
       });
   }
-
   return (
     <>
       <Router>
