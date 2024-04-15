@@ -3,6 +3,7 @@ const express = require('express');
 const authService = require('./authService');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { auth } = require('../middleware/auth');
 
 
 router.post('/auth/register', async (req, res) => {
@@ -37,5 +38,15 @@ router.get('/auth/logout', async (req, res) => {
     }
 });
 
+router.put('/auth/password', auth, async (req, res) => {
+    const profileid = res.locals.profileid;
+    const { password } = req.body;
+    const result = await authService.changePassword(password, profileid);
+    if (result.success) {
+        res.status(200).json({ message: result.message });
+    } else {
+        res.status(400).json({ message: result.message });
+    }
+});
 
 module.exports = router;
