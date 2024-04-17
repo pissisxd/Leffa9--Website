@@ -7,9 +7,9 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import './favoritebutton.css';
 import Reviews from './Reviews';
 
-
-const SeriesDetails = ({profileid}) => {
+const SeriesDetails = () => {
   const { id} = useParams();
+  const { profilename } = useParams();
   const [series, setSeries] = useState(null);
   const [providers, setProviders] = useState(null);
   const [profileId, setProfileId] = useState(null);
@@ -45,7 +45,7 @@ const SeriesDetails = ({profileid}) => {
     return () => clearTimeout(timeoutId);
   }, [id]);
 // lisätään suosikkeihin sarja
-console.log(series, profileid)
+console.log(series, profileId)
 
 useEffect(() => {
   
@@ -55,7 +55,7 @@ useEffect(() => {
 const addToFavorites = async () => {
   try {
     await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileId}`);
-    if (series && profileId) { 
+    if (series && profilename) { 
       const data = {
         favoriteditem: series.name,
         showtime: new Date(),
@@ -74,7 +74,7 @@ const addToFavorites = async () => {
       console.error('Sarjaa tai profiilitunnistetta ei löydy');
     }
   } catch (error) {
-    console.error('Jotain meni vikaan:', error);
+    console.error('voi perkele nyt', error);
   }
   setIsFavorite(true);
 };

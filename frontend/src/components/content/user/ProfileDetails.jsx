@@ -46,24 +46,6 @@ const ProfileDetails = ({ user, favorites}) => {
         const newFavorites = favorites.filter((favorite) => favorite.id !== item.id);
         setFavorites(newFavorites);
       };
-
-    useEffect(() => {
-        const simulateLogin = async () => {
-            const timestamp = new Date().toLocaleString();
-            setLastLoggedIn(timestamp);
-        };
-
-        simulateLogin();
-    }, [user]);
-
-    const formatDate = (timestamp) => {
-        const date = new Date(timestamp);
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        return `${day}.${month}.${year}`;
-    };
-
     return (
         <div className="content">
             <div className="inner-view">
