@@ -5,6 +5,7 @@ const { VITE_APP_BACKEND_URL } = import.meta.env;
 import ReviewForm from './ReviewForm';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import './favoritebutton.css';
+import Reviews from './Reviews';
 
 const MovieDetails = ({profileId}) => {
   const { id } = useParams();
@@ -12,43 +13,13 @@ const MovieDetails = ({profileId}) => {
   const [providers, setProviders] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  /*useEffect(() => {
-    const fetchData = async () => {
-      try {
-    const [movieResponse, providersResponse] = await Promise.all([
-      axios.get(`${VITE_APP_BACKEND_URL}/movie/${id}`),
-      axios.get(`${VITE_APP_BACKEND_URL}/movie/provider/${id}`)
-    ]);
-
-        setMovie(movieResponse.data);
-        setProviders(providersResponse.data);
-
-      } catch (error) {
-
-        if (error.response && error.response.status === 404) {
-        console.error('Virhe elokuvan hakemisessa:', error);
-      } else {
-        console.error('Jokin meni pieleen:', error);
-      }
-    }
-  };
-  
-    fetchData();
-    
-    // Asetetaan timeout fetchProviders-funktiolle 5 sekunniksi
-    const timeoutId = setTimeout(fetchData, 100);
-  
-    // Palautetaan poisto-funktio, joka suoritetaan komponentin purkamisen yhteydessä
-    return () => clearTimeout(timeoutId);
-  }, [id]);*/
-
   useEffect(() => {
     const fetchMovie = async () => {
       try {
         const response = await axios.get(`${VITE_APP_BACKEND_URL}/movie/${id}`);
         setMovie(response.data);
       } catch (error) {
-        console.error('Virhe elokuvan hakemisessa:', error);
+        console.error('Hakuvirhe:', error);
       }
     };
 
@@ -57,7 +28,6 @@ const MovieDetails = ({profileId}) => {
         const response = await axios.get(`${VITE_APP_BACKEND_URL}/movie/provider/${id}`);
         setProviders(response.data);
       } catch (error) {
-        console.error('Virhe palveluntarjoajien hakemisessa:', error);
         // Jos pyyntö epäonnistuu, asetetaan providers-tila tyhjään JSON-objektiin
         setProviders({});
       }
@@ -179,57 +149,8 @@ const addToFavorites = async () => {
               <br/>
               <h2>Viimeisimmät arvostelut</h2>
 
-              <div className="reviewslisted">
-                <b>Lähetetty:</b> 00.00.2024 <br />
-                <b>Käyttäjältä:</b> <i>Anonymous</i> <br />
-                <b>Arvio:</b> &#11088;&#11088;&#11088;&#11088;&#11088; [5/5] tähteä <br />
-                <b>Perustelut:</b> <br />
-                Esimerkkiarvostelu, tämä on placeholder vaikkapa. Ihan kiva leffa ois, jos katsoa ehtis. Kaikki aika katoaa nykyään johonkin. Epäoleelliseen?
-                Ehkä ei kuitenkaan. Annan silti runsaat viisi tähteä, koska voin. Koska tämähän oli vain.. esimerkki yhdestä arvostelusta?<br /><br />
-              </div>
-
-              <div className="reviewslisted">
-                <b>Lähetetty:</b> 00.00.2024 <br />
-                <b>Käyttäjältä:</b> <i>Anonymous</i> <br />
-                <b>Arvio:</b> &#11088;&#11088;&#11088;&#11088;&#11088; [5/5] tähteä <br />
-                <b>Perustelut:</b> <br />
-                Esimerkkiarvostelu, tämä on placeholder vaikkapa. Ihan kiva leffa ois, jos katsoa ehtis. Kaikki aika katoaa nykyään johonkin. Epäoleelliseen?
-                Ehkä ei kuitenkaan. Annan silti runsaat viisi tähteä, koska voin. Koska tämähän oli vain.. esimerkki yhdestä arvostelusta?<br /><br />
-              </div>
-
-              <div className="reviewslisted">
-                <b>Lähetetty:</b> 00.00.2024 <br />
-                <b>Käyttäjältä:</b> <i>Anonymous</i> <br />
-                <b>Arvio:</b> &#11088;&#11088;&#11088;&#11088;&#11088; [5/5] tähteä <br />
-                <b>Perustelut:</b> <br />
-                Esimerkkiarvostelu, tämä on placeholder vaikkapa. Ihan kiva leffa ois, jos katsoa ehtis. Kaikki aika katoaa nykyään johonkin. Epäoleelliseen?
-                Ehkä ei kuitenkaan. Annan silti runsaat viisi tähteä, koska voin. Koska tämähän oli vain.. esimerkki yhdestä arvostelusta?<br /><br />
-              </div>
-
-              <div className="reviewslisted">
-                <b>Lähetetty:</b> 00.00.2024 <br />
-                <b>Käyttäjältä:</b> <i>Anonymous</i> <br />
-                <b>Arvio:</b> &#11088;&#11088;&#11088;&#11088;&#11088; [5/5] tähteä <br />
-                <b>Perustelut:</b> <br />
-                Esimerkkiarvostelu, tämä on placeholder vaikkapa. Ihan kiva leffa ois, jos katsoa ehtis. Kaikki aika katoaa nykyään johonkin. Epäoleelliseen?
-                Ehkä ei kuitenkaan. Annan silti runsaat viisi tähteä, koska voin. Koska tämähän oli vain.. esimerkki yhdestä arvostelusta?<br /><br />
-              </div>
-
-              <div className="reviewslisted">
-                <b>Lähetetty:</b> 00.00.2024 <br />
-                <b>Käyttäjältä:</b> <i>Anonymous</i> <br />
-                <b>Arvio:</b> &#11088;&#11088;&#11088;&#11088;&#11088; [5/5] tähteä <br />
-                <b>Perustelut:</b> <br />
-                Esimerkkiarvostelu, tämä on placeholder vaikkapa. Ihan kiva leffa ois, jos katsoa ehtis. Kaikki aika katoaa nykyään johonkin. Epäoleelliseen?
-                Ehkä ei kuitenkaan. Annan silti runsaat viisi tähteä, koska voin. Koska tämähän oli vain.. esimerkki yhdestä arvostelusta?<br /><br />
-              </div>
-
+              <div className="reviewslisted"><Reviews movieId={id} mediatype={0}/></div>
             </div>
-
-            <div className="justMargins">
-              <Link to="/search">Tee uusi haku</Link>
-            </div>
-
           </div>
         )}
       </div>

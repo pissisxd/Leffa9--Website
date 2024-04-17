@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './user.css';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
+import { getHeaders } from '@auth/token';
 import GroupList from './GroupList';
 import ReviewList from './ReviewList';
 import ProfileEdit from './ProfileEdit'; 
@@ -17,21 +18,12 @@ const ProfileDetails = ({ user, favorites}) => {
     const [editMode, setEditMode] = useState(false); 
     const [isOwnProfile, setOwnProfile] = useState(false);
     const [isPrivate, setPrivate] = useState(false);
+    const headers = getHeaders();
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const token = sessionStorage.getItem('token');
-                const headers = {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                };
-
                 const response = await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profilename}`, { headers });
-
-                console.log("Token from sessionStorage:", token);
-                console.log("Profilename from token:", profilename);
-                console.log("Response from profile:", response.data);
 
                 setProfile(response.data);
                 setOwnProfile(response.data.isOwnProfile);
@@ -55,13 +47,30 @@ const ProfileDetails = ({ user, favorites}) => {
         setFavorites(newFavorites);
       };
 
+    useEffect(() => {
+        const simulateLogin = async () => {
+            const timestamp = new Date().toLocaleString();
+            setLastLoggedIn(timestamp);
+        };
+
+        simulateLogin();
+    }, [user]);
+
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
+    };
+
     return (
         <div className="content">
             <div className="inner-view">
                 <div className="inner-left">
                     <img src={profile?.profilepicurl || ''} className="profilepic" alt="Käyttäjän kuva" />
                     {!isPrivate && <p>Viimeksi kirjautunut <br></br><DatabaseDateTime /></p>}
-                    {(isOwnProfile && !editMode) && <button onClick={handleEditClick} className="basicbutton">Muokkaa profiilia</button>}
+                    {(isOwnProfile && !editMode) && <button onClick={() => setEditMode(true)} className="basicbutton">Muokkaa profiilia</button>}
                 </div>
 
                 <div className="inner-right">

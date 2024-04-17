@@ -5,6 +5,7 @@ const { VITE_APP_BACKEND_URL } = import.meta.env;
 import ReviewFormSerie from './ReviewFormSerie';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import './favoritebutton.css';
+import Reviews from './Reviews';
 
 
 const SeriesDetails = ({profileid}) => {
@@ -29,8 +30,7 @@ const SeriesDetails = ({profileid}) => {
         const response = await axios.get(`${VITE_APP_BACKEND_URL}/tv/provider/${id}`);
         setProviders(response.data);
       } catch (error) {
-        console.error('Virhe palveluntarjoajien hakemisessa:', error);
-        // Jos pyyntö epäonnistuu, asetetaan providers-tila tyhjään JSON-objektiin
+        // asetetaan providers-tila tyhjään JSON-objektiin
         setProviders({});
       }
     };
@@ -134,24 +134,12 @@ const addToFavorites = async () => {
 
             <div><ReviewFormSerie tvShowId={id} /></div>
 
-              <h2>Viimeisimmät arvostelut</h2>
+            <br/>
+            <h2>Viimeisimmät arvostelut</h2>
 
-              <div className="reviewslisted">
-                <b>Lähetetty:</b> 00.00.2024 <br />
-                <b>Käyttäjältä:</b> <i>Anonymous</i> <br />
-                <b>Arvio:</b> &#11088;&#11088;&#11088;&#11088;&#11088; [5/5] tähteä <br />
-                <b>Perustelut:</b> <br />
-                Esimerkkiarvostelu, tämä on placeholder vaikkapa. Ihan kiva sarja ois, jos katsoa ehtis. Kaikki aika katoaa nykyään johonkin. Epäoleelliseen?
-                Ehkä ei kuitenkaan. Annan silti runsaat viisi tähteä, koska voin. Koska tämähän oli vain.. esimerkki yhdestä arvostelusta?<br /><br />
-              </div>
-
+            <div className="reviewslisted"><Reviews movieId={id} mediatype={1}/></div>
             </div>
-
-            <div className="justMargins">
-              <Link to="/search">Tee uusi haku</Link>
             </div>
-
-          </div>
         )}
       </div>
     </div>
