@@ -52,10 +52,10 @@ useEffect(() => {
   setIsFavorite();
 }, []);
 
-const addToFavorites = async () => {
+const addToFavorites = async (profileId) => {
   try {
     await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileId}`);
-    if (series && profilename) { 
+    if (series && profileId) { 
       const data = {
         favoriteditem: series.name,
         showtime: new Date(),
