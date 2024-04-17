@@ -99,7 +99,7 @@ const ProfileDetails = ({ user, favorites}) => {
 
                     <div className='reviews-view'>
                         <h2>Arvostelut  &nbsp;<span className='emoji uni08'></span></h2>
-                      //  <ReviewList profile={profile} />
+                      {/* <ReviewList profile={profile} /> */}
                     </div>
 
                 </>

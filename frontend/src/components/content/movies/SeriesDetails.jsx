@@ -3,13 +3,16 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 import ReviewFormSerie from './ReviewFormSerie';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import './favoritebutton.css';
 
 
-const SeriesDetails = () => {
+const SeriesDetails = ({profileid}) => {
   const { id} = useParams();
   const [series, setSeries] = useState(null);
   const [providers, setProviders] = useState(null);
   const [profileId, setProfileId] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -42,40 +45,58 @@ const SeriesDetails = () => {
     return () => clearTimeout(timeoutId);
   }, [id]);
 // lisätään suosikkeihin sarja
-console.log(series, profileId)
+console.log(series, profileid)
 
-  const addToFavorites = async () => {
-    
-    try {
-      if (series && profileId) { 
-        const response = await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, {
-          favoriteditem: series.id,
-          showtime: new Date(),
-          groupid: null,
-          profileId: profileId,
-          mediatype: 1 
-        });
-        
-        console.log(response.data);
-      } else {
-        console.error('Sarjaa tai profiilitunnistetta ei löytynyt');
-      }
-    } catch (error) {
-      console.error('Virhe lisättäessä suosikkilistaa:', error);
-    }
-  };
+useEffect(() => {
   
+  setIsFavorite();
+}, []);
+
+const addToFavorites = async () => {
+  try {
+    await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileId}`);
+    if (series && profileId) { 
+      const data = {
+        favoriteditem: series.name,
+        showtime: new Date(),
+        groupid: null,
+        profileId: profileId,
+      };
+      axios.post(`${VITE_APP_BACKEND_URL}/favoritelist/favoriteditem`, data)
+        .then(response => {
+          console.log(response.data);
+          setIsFavorite(true); 
+        })
+        .catch(error => {
+          console.error('Virhe lisättäessä suosikkeihin:', error);
+        });
+    } else {
+      console.error('Sarjaa tai profiilitunnistetta ei löydy');
+    }
+  } catch (error) {
+    console.error('Jotain meni vikaan:', error);
+  }
+  setIsFavorite(true);
+};
+  // poistetaan suosikeista sarja
+  const deleteFromFavorites = () => {
+    setIsFavorite(false); // 
+  };
+
 
 
   return (
     <div id="backdrop" style={series && { backgroundImage: `url(https://image.tmdb.org/t/p/original${series.backdrop_path})`, backgroundSize: 'cover' }}>
       <div className="content">
-
         {series && (
           <div id="backdropbg">
-
             <div className="moviemain">
-              <img className="posterimg" src={`https://image.tmdb.org/t/p/w342${series.poster_path}`} alt={series.title} />
+            <div style={{ position: 'relative' }}>
+        <button className="favorite-button" onClick={isFavorite ? deleteFromFavorites : addToFavorites}>
+        {isFavorite ? <FaHeart className="favorite-icon" size={34} /> : <FaRegHeart size={34} />}
+        </button>
+        <img className="poster-img" src={`https://image.tmdb.org/t/p/w342${series.poster_path}`} alt={series.title} />
+      </div>
               <div className="movieinfo">
 
                 <h2>{series.name}</h2>
@@ -86,8 +107,7 @@ console.log(series, profileId)
                 <p><b>Tuotantoyhtiöt:</b> {series.production_companies.map(company => company.name).join(', ')}</p>
                 <p><b>Kerännyt ääniä:</b> {series.vote_count}</p>
                 <p><b>Äänten keskiarvo:</b> {series.vote_average} / 10 </p>
-                <button onClick={addToFavorites}>Lisää suosikkeihin</button>
-                <button onClick={() => deleteFromFavorites(series)}>Poista</button>
+              <button onClick={() => deleteFromFavorites(series)}>Poista testinappi</button>
                 {providers && providers.flatrate && (
                   <table className='providers'>
                     <tbody>
@@ -136,6 +156,6 @@ console.log(series, profileId)
       </div>
     </div>
   );
-};
+}
 
 export default SeriesDetails;

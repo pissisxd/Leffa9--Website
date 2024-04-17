@@ -3,11 +3,14 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 import ReviewForm from './ReviewForm';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import './favoritebutton.css';
 
 const MovieDetails = ({profileId}) => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [providers, setProviders] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   /*useEffect(() => {
     const fetchData = async () => {
@@ -71,24 +74,45 @@ const MovieDetails = ({profileId}) => {
 
   //lisätään elokuva suosikkeihin
   console.log(movie, profileId)
-  const addToFavorites = async () => {
+  useEffect(() => {
+  
+    setIsFavorite();
+  }, []);
+const addToFavorites = async () => {
     try {
-      if (movie && profileId) { 
-        const response = await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist/`, {
-          favoriteditem: movie.id,
-          showtime: new Date(),
-          groupid: null,
-          profileid: profileId,
-          mediatype: 0 
-        });
-        console.log(response.data);
+      // Tarkistetaan, että käyttäjä on kirjautunut sisään
+      if (profileId !== null) {
+        if (movie && profileId) { 
+          const data = {
+            favoriteditem: movie.name,
+            showtime: new Date(),
+            groupid: null,
+            profileId: profileId,
+            mediatype: 0,
+          };
+          axios.post(`${VITE_APP_BACKEND_URL}/favoritelist/favoriteditem`, data)
+            .then(response => {
+              console.log(response.data);
+              setIsFavorite(true); 
+            })
+            .catch(error => {
+              console.error('Virhe lisättäessä suosikkeihin:', error);
+            });
+        } else {
+          console.error('Elokuvaa tai profiilitunnistetta ei löydy');
+        }
       } else {
-        console.error('Elokuva tai profiilitunnistetta ei löytynyt');
+        console.error('Käyttäjä ei ole kirjautunut sisään');
       }
     } catch (error) {
-      console.error('Virhe lisättäessä suosikkilistaa:', error);
+      console.error('Jotain meni vikaan:', error);
     }
+    setIsFavorite(true);
   };
+    // poistetaan suosikeista elokuva
+    const deleteFromFavorites = () => {
+      setIsFavorite(false); // 
+    };
 
   return (
     <div id="backdrop" style={movie && { backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`, backgroundSize: 'cover' }}>
@@ -98,7 +122,12 @@ const MovieDetails = ({profileId}) => {
           <div id="backdropbg">
 
             <div className="moviemain">
+            <div style={{ position: 'relative' }}>
+            <button className="favorite-button" onClick={isFavorite ? deleteFromFavorites : addToFavorites}>
+            {isFavorite ? <FaHeart className="favorite-icon" size={34} /> : <FaRegHeart size={34} />}
+          </button>
               <img className="posterimg" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
+              </div>
               <div className="movieinfo">
 
                 <h2>{movie.title}</h2>
@@ -109,7 +138,6 @@ const MovieDetails = ({profileId}) => {
                 <p><b>Tuotantoyhtiöt:</b> {movie.production_companies.map(company => company.name).join(', ')}</p>
                 <p><b>Kerännyt ääniä:</b> {movie.vote_count}</p>
                 <p><b>Äänten keskiarvo:</b> {movie.vote_average} / 10 </p>
-                <button onClick={() => addToFavorites(movie)}>Lisää</button>
                 <button onClick={() => deletefromFavorites(movie)}>Poista</button>
 
 
