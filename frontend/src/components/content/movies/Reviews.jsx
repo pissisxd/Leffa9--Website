@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import './Homepage.css'; // Sisällytä CSS-tiedosto suoraan komponenttiin
+import './movies.css'; // Sisällytä CSS-tiedosto suoraan komponenttiin
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
 
-const Latestreviews = () => {
+const Reviews = ({ movieId, mediatype }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,7 +13,7 @@ const Latestreviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(`${VITE_APP_BACKEND_URL}/review/new`);
+        const response = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/${movieId}/${mediatype}`);
         const reviewData = response.data;
 
         // Hae jokaisen arvostelun review.revieweditem arvolla liittyvä elokuva
@@ -27,10 +27,21 @@ const Latestreviews = () => {
               const tvResponse = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}/series/${encodeURIComponent(review.revieweditem)}`);
               responseData = tvResponse.data;
             }
+            console.log(responseData)
+            // Haetaan profiilitiedot
+            const profileResponse = await axios.get(`${VITE_APP_BACKEND_URL}/profile/id/${review.profileid}`);
+            const profileData = profileResponse.data;
+
+            if (profileResponse && profileResponse.data) {
             return {
               ...review,
-              data: responseData
+              data: responseData,      
+              profile: profileData,
             };
+          } else {
+            console.error('Profiilitiedon hakeminen epäonnistui:', profileResponse);
+            return {};
+          }
           } catch (error) {
             console.error('Virhe tiedon hakemisessa:', error);
             // Palauta tyhjä objekti, jos hakeminen epäonnistuu
@@ -48,7 +59,7 @@ const Latestreviews = () => {
     };
 
     fetchReviews();
-  }, []);
+  }, [movieId, mediatype]);
 
 
 
@@ -57,57 +68,31 @@ const Latestreviews = () => {
       {loading ? (
         <p>Ladataan arvosteluja...</p>
       ) : (
-        <div className="reviewmain">
+        <div>
           {reviews.map((review, index) => (
-            <table className="review-item" key={index}>
-              <tbody>
-                <tr>
-                <td className='tdimg'>
-                {review.mediatype === 0 ? (
-                <Link to={`/movie/${review.revieweditem}`} className="link-style">
-                <img src={`https://image.tmdb.org/t/p/w342${review.data.poster_path}`} alt={review.data.title} />
-                <div>             
-                  {[...Array(review.rating)].map((_, i) => (
-                    <span key={i} >&#11088;</span>
-                  ))}
-                  {[...Array(5 - review.rating)].map((_, i) => (
-                    <span key={i + review.rating}>&#x2605;</span>
-                  ))}
-                  </div>
-                  </Link>
-                  ) : (
-                  <Link to={`/series/${review.revieweditem}`} className="link-style">
-                  <img src={`https://image.tmdb.org/t/p/w342${review.data.poster_path}`} alt={review.data.name} />
-                  <div>             
-                  {[...Array(review.rating)].map((_, i) => (
-                    <span key={i} >&#11088;</span>
-                  ))}
-                  {[...Array(5 - review.rating)].map((_, i) => (
-                    <span key={i + review.rating}>&#x2605;</span>
-                  ))}
-                  </div>
-                  </Link>
-                  )}
-                  </td>
-                  <td>
-
-                  </td>
-                  
-                  <td className="review-info">
-                    <h2>{review.data.title}{review.data.name}</h2>
-                    <p><b>Arvostelu: </b> {review.review}</p>
-                    <p><b>Arvosteltu: </b>{new Date(review.timestamp).toLocaleString('fi-FI', {
+  
+            <div key={index}>
+                <b>Lähetetty:</b> {new Date(review.timestamp).toLocaleString('fi-FI', {
                       day: 'numeric',
                       month: 'numeric',
                       year: 'numeric',
                       hour: 'numeric',
                       minute: 'numeric',
-                    })}</p>
-                    <p><b>Arvostelija: </b> {review.profilename}</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    })} <br />
+                <b>Käyttäjältä:</b> <i><Link to={`/profile/${review.profile.profilename}`}>{review.profile.profilename}</Link></i> <br />
+                <b>Arvio:</b>                             
+                  {[...Array(review.rating)].map((_, i) => (
+                    <span key={i} >&#11088;</span>
+                  ))}
+                  {[...Array(5 - review.rating)].map((_, i) => (
+                    <span key={i + review.rating}>&#x2605;</span>
+                  ))}
+                  <br />
+                <b>Perustelut:</b> <br />
+                {review.review}<br /><br />
+            </div>
+              
+            
           ))}
         </div>
       )}
@@ -115,4 +100,4 @@ const Latestreviews = () => {
   );
 };
 
-export default Latestreviews;
+export default Reviews;

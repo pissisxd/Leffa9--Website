@@ -1,14 +1,4 @@
-const { Pool } = require('pg');
-
-// PostgreSQL-yhteysasetukset
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-  ssl: process.env.DB_SSL,
-});
+const pool = require('../database/db_connection');
 
 async function queryDatabase(query) {
   try {
@@ -19,6 +9,126 @@ async function queryDatabase(query) {
   }
 }
 
+async function movieReviewFromUser(profileid, mediatype, rating, review, revieweditem) {
+
+  try {
+    const query = {
+      text: 'INSERT INTO Review_ (rating, revieweditem, review, profileid, mediatype) VALUES ($1, $2, $3, $4, $5)',
+      values: [rating, revieweditem, review, profileid, mediatype],
+    };
+    await pool.query(query);
+    return true;
+  }
+  catch (error) {
+    console.error('Luontivirhe:', error);
+    return false;
+  }
+}
+
+async function serieReviewFromUser(profileid, mediatype, rating, review, revieweditem) {
+
+  try {
+    const query = {
+      text: 'INSERT INTO Review_ (rating, revieweditem, review, profileid, mediatype) VALUES ($1, $2, $3, $4, $5)',
+      values: [rating, revieweditem, review, profileid, mediatype],
+    };
+    await pool.query(query);
+    return true;
+  }
+  catch (error) {
+    console.error('Luontivirhe:', error);
+    return false;
+  }
+}
+
+async function getAllReviews() {
+  const query = 'SELECT * FROM Review_';
+  return await queryDatabase(query);
+}
+
+async function getNewestReviews() {
+  const query = `
+      SELECT review_.*, profile_.profilename 
+      FROM review_ 
+      INNER JOIN profile_ ON review_.profileid = profile_.profileid
+      ORDER BY review_.timestamp DESC 
+      LIMIT 12
+  `;
+  return await queryDatabase(query);
+}
+
+async function updateReview(idreview, review, rating) {
+  const query = {
+    text: 'UPDATE Review_ SET review = $2, rating = $3 WHERE idreview = $1',
+    values: [idreview, review, rating],
+  };
+  await queryDatabase(query);
+}
+
+async function deleteReview(id) {
+  const query = {
+    text: 'DELETE FROM Review_ WHERE idreview = $1',
+    values: [id],
+  };
+  await queryDatabase(query);
+}
+
+async function getReviewsByProfile(id) {
+  const query = {
+    text: 'SELECT * FROM Review_ WHERE profileid = $1',
+    values: [id],
+  };
+  return await queryDatabase(query);
+}
+
+async function serieReviewExists(profileid, revieweditem, mediatype) {
+  try {
+    const query = {
+      text: 'SELECT EXISTS(SELECT 1 FROM Review_ WHERE profileid = $1 AND revieweditem = $2 AND mediatype = $3) as "exists"',
+      values: [profileid, revieweditem, mediatype],
+    };
+    const result = await queryDatabase(query);
+    return result[0].exists;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getReviewsByItem(id, mediatype) {
+  try {
+    const query = {
+      text: 'SELECT * FROM Review_ WHERE revieweditem = $1 AND mediatype = $2 ORDER BY review_.timestamp DESC ',
+      values: [id, mediatype],
+    };
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function updateReviewToAnon(profileid) {
+  try {
+    const query = {
+      text: 'UPDATE Review_ SET profileid = 1 WHERE profileid = $1',
+      values: [profileid],
+    };
+    await queryDatabase(query);
+  } catch (error) {
+    throw error;
+  }
+}
+
+
 module.exports = {
-  queryDatabase,
+  movieReviewFromUser,
+  serieReviewFromUser,
+  getAllReviews,
+  getNewestReviews,
+  updateReview,
+  deleteReview,
+  getReviewsByProfile,
+  serieReviewExists,
+  getReviewsByItem,
+  updateReviewToAnon
 };

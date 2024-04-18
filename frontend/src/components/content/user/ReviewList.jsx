@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react';
 import './user.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+const { VITE_APP_BACKEND_URL } = import.meta.env;
+
 
 const ReviewList = ({ profile }) => {
 
   const [reviews, setReviews] = useState([]);
   const [editReviewId, setEditReviewId] = useState(null);
   const [updatedReview, setUpdatedReview] = useState({
-    review: '', rating: 0 });
+    review: '', rating: 0
+  });
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [reviewsPerPage, setReviewsPerPage] = useState(4);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const isOwnProfile = profile && profile.isOwnProfile;
 
 
@@ -17,22 +23,26 @@ const ReviewList = ({ profile }) => {
     try {
       if (profile && profile.profileid) {
 
-        const response = await axios.get(`http://localhost:3001/reviews/profile/${profile.profileid}`);
+        const response = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/profile/${profile.profileid}`);
         const reviewData = response.data;
 
         const reviewsWithMovies = await Promise.all(reviewData.map(async review => {
           try {
-            const movieResponse = await axios.get(`http://localhost:3001/movie/${review.revieweditem}`);
-            const movieData = movieResponse.data;
-
-            if (movieData && movieData.title) {
-              return {
-                ...review,
-                movie: movieData,
-                link: `/movie/${review.revieweditem}`
-              };
-            } else {
-              return review;
+            let responseData;
+              if (review.mediatype === 0) {
+                const movieResponse = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}/movie/${encodeURIComponent(review.revieweditem)}`);
+                responseData = movieResponse.data;
+              } else if (review.mediatype === 1) {
+                const tvResponse = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}/series/${encodeURIComponent(review.revieweditem)}`);
+                responseData = tvResponse.data;
+              }
+              if (responseData && responseData.title || responseData.name) {
+                return {
+                  ...review,
+                  movie: responseData,
+                };
+              } else {
+                return review;
             }
           } catch (error) {
             console.error('Hakuvirhe:', error);
@@ -40,7 +50,8 @@ const ReviewList = ({ profile }) => {
           }
         }));
 
-        setReviews(reviewsWithMovies);
+        const sortedReviews = reviewsWithMovies.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setReviews(reviewsWithMovies, sortedReviews);
       }
     } catch (error) {
       console.error('Hakuvirhe:', error);
@@ -51,19 +62,19 @@ const ReviewList = ({ profile }) => {
     fetchReviews();
   }, [profile]);
 
-    {/*const handleDeleteReview = async (idreview) => {
+  {/*const handleDeleteReview = async (idreview) => {
       try {
-        const response = await axios.delete(`http://localhost:3001/review/${idreview}`);
+        const response = await axios.delete(`${VITE_APP_BACKEND_URL}/review/${idreview}`);
         console.log(response.data);
         setReviews(reviews.filter(review => review.idreview !== idreview));
       } catch (error) {
         console.error('Poistovirhe:', error);
       }
     };*/}
-  
+
   const handleConfirmDelete = async (idreview) => {
     try {
-      const response = await axios.delete(`http://localhost:3001/review/${idreview}`);
+      const response = await axios.delete(`${VITE_APP_BACKEND_URL}/review/${idreview}`);
       console.log(response.data);
       setReviews(reviews.filter(review => review.idreview !== idreview));
       setConfirmDeleteId(null);
@@ -72,13 +83,13 @@ const ReviewList = ({ profile }) => {
     }
   };
 
-    const handleReviewEdit = (idreview) => {
+  const handleReviewEdit = (idreview) => {
     setEditReviewId(idreview);
   };
 
   const handleUpdateReview = async (idreview) => {
     try {
-      const response = await axios.put(`http://localhost:3001/reviews/update/${idreview}`, updatedReview);
+      const response = await axios.put(`${VITE_APP_BACKEND_URL}/reviews/update/${idreview}`, updatedReview);
       setEditReviewId(null);
       fetchReviews();
     } catch (error) {
@@ -118,30 +129,70 @@ const ReviewList = ({ profile }) => {
     return `${day}.${month}.${year}`;
   };
 
+  const filteredReviews = reviews.filter(review =>
+    review.review.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastReview = currentPage * reviewsPerPage;
+  const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+  const currentReviews = filteredReviews.slice(indexOfFirstReview, indexOfLastReview);
+
+  function truncateLongWords(text, maxLength) {
+    return text.split(' ').map(word => {
+      return word.length > maxLength ? word.substring(0, maxLength) + '...' : word;
+    }).join(' ');
+  }
+
   return (
     <>
-      <ul>
-        {reviews.map((review, index) => (
-          <li key={index}>
-            <span>{formatDate(review.timestamp)}</span> <br/>
-            {review.movie ? (
-              <Link to={`/movie/${review.revieweditem}`}>{review.movie.title}</Link>
+      <ul className="review-list">
+        <li className="userinfo">
+          Kirjoittanut <b>{filteredReviews.length}</b> arvostelua. <br />
+          Arvostelujen keskiarvo on <b>{filteredReviews.length > 0 && (filteredReviews.reduce((sum, review) => sum + review.rating, 0) / filteredReviews.length).toFixed(1)}</b>.<br /><br />
+        </li>
+
+        <ul className="pagination">
+          <li>
+            <button className="buttonnext" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}>
+              ⯇
+            </button>
+            &nbsp; <span className="communityinfo">selaa</span> &nbsp;
+            <button className="buttonnext" onClick={() => setCurrentPage(currentPage < Math.ceil(filteredReviews.length / reviewsPerPage) ? currentPage + 1 : Math.ceil(filteredReviews.length / reviewsPerPage))}>
+              ⯈
+            </button>
+          </li>
+        </ul>
+
+        <hr />
+
+        {currentReviews.map((review, index) => (
+          <li className='minheight' key={index}>
+            {review.mediatype === 0 ? (
+            <Link to={`/movie/${review.revieweditem}`}><img className='reviewimg' src={`https://image.tmdb.org/t/p/w342${review.movie.poster_path}`} alt={review.movie.title} /></Link>
             ) : (
-              <span>{review.revieweditem}</span>
+              <Link to={`/series/${review.revieweditem}`}><img className='reviewimg' src={`https://image.tmdb.org/t/p/w342${review.movie.poster_path}`} alt={review.movie.name} /></Link>
+              
             )}
+            <span className='reviewinfo'>{formatDate(review.timestamp)}</span> <br />
+                  
+            {review.mediatype === 0 ? (
+              <Link className='reviewtitle' to={`/movie/${review.revieweditem}`}>{review.movie.title}</Link>
+            ) : (
+              <Link className='reviewtitle' to={`/series/${review.revieweditem}`}>{review.movie.name}</Link>
+            )}             
             <br />
             <span>{renderRatingIcons(review.rating)}</span>
-            <span className='userinfo'>| <b>{review.rating}/5</b> tähteä</span> <br/>
-            <span className='userinfo'>{review.review}</span> <br />
+            <span className='userinfo'>| <b>{review.rating}/5</b> tähteä</span> <br />
+            <span className='userinfo'>{truncateLongWords(review.review, 25)}</span> <br />
             {!editReviewId && isOwnProfile && (
               <button className="compactButton" onClick={() => handleReviewEdit(review.idreview)}><span className='review uni11'></span> Muokkaa arvostelua</button>
             )}
             {editReviewId === review.idreview && (
               <div className="edit-review">
                 <b>Tähdet välillä 1-5</b> <br />
-                <input type="number" min="1" max="5" value={updatedReview.rating} onChange={setRating} /> <br/>
+                <input className='updateRating' type="number" min="1" max="5" value={updatedReview.rating} onChange={setRating} /> <br />
                 <b>Kommentti</b> <br />
-                <textarea className="updateReview" value={updatedReview.review} onChange={setReview} /> <br/>
+                <textarea className="updateReview" value={updatedReview.review} onChange={setReview} /> <br />
                 <button className="compactButton" onClick={() => handleUpdateReview(review.idreview)}><span className='review uni13'></span> Tallenna muutokset</button>
                 <button className="compactButton" onClick={() => setEditReviewId(null)}>Peruuta muutokset</button>
               </div>
@@ -160,14 +211,11 @@ const ReviewList = ({ profile }) => {
               </>
             )}
 
-            <hr />
           </li>
-
         ))}
       </ul>
+
     </>
-
   );
-};
-
+}
 export default ReviewList;

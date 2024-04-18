@@ -1,74 +1,52 @@
 const reviewModel = require('./reviewModel');
 
+// arvostelun lähettäminen käyttöliittymästä (elokuva)
+async function movieReviewFromUser(req, res) {
+  profileid = res.locals.profileid;
 
-// GET-endpoint hakee groupname taulusta review annetun groupid-arvon perusteella
+  const { mediatype, rating, review, revieweditem } = req.body;
+
+  const addReview = await reviewModel.movieReviewFromUser(profileid, mediatype, rating, review, revieweditem);
+  if (addReview) {
+    res.status(201).send('Arvostelu lisätty onnistuneesti');
+  } else {
+
+    res.status(500).send('Virhe luotaessa arvostelua');
+  }
+}
+
+// arvostelun lähettäminen käyttöliittymästä (SARJA)
+async function serieReviewFromUser(req, res) {
+  profileid = res.locals.profileid;
+
+  const { mediatype, rating, review, revieweditem } = req.body;
+
+  const addReview = await reviewModel.serieReviewFromUser(profileid, mediatype, rating, review, revieweditem);
+  if (addReview) {
+    res.status(201).send('Arvostelu lisätty onnistuneesti');
+  } else {
+
+    res.status(500).send('Virhe luotaessa arvostelua');
+  }
+}
+
 async function getAllReviews(req, res) {
   try {
-      const query = 'SELECT * FROM Review_';
-      const review = await reviewModel.queryDatabase(query);
-      res.json(review);
-  } catch (error) {
-      console.error('Virhe haettaessa tietueita:', error);
-      res.status(500).send('Virhe haettaessa tietueita');
-  }
-};
-
-// arvostelut käyttäjältä x esim. profiilisivulle
-async function getReviewsByProfile(req, res) {
-  const id = req.params.id;
-  try {
-    const query = {
-      text: 'SELECT * FROM Review_ WHERE profileid = $1',
-      values: [id],
-    }; 
-    const reviews = await reviewModel.queryDatabase(query); 
+    const reviews = await reviewModel.getAllReviews();
     res.json(reviews);
   } catch (error) {
     console.error('Virhe haettaessa arvosteluja:', error);
     res.status(500).send('Virhe haettaessa arvosteluja');
-  }
-}
-
-async function getReviewById(req, res) {
-  const id = req.params.id;
-  try {
-    const review = await reviewModel.getReviewById(id);
-    if (review) {
-      res.json(review);
-    } else {
-      res.status(404).send('Arvostelua ei löytynyt');
-    }
-  } catch (error) {
-    console.error('Virhe haettaessa arvostelua:', error);
-    res.status(500).send('Virhe haettaessa arvostelua');
   }
 }
 
 async function getNewestReviews(req, res) {
   try {
-    const query = `
-      SELECT review_.*, profile_.profilename 
-      FROM review_ 
-      INNER JOIN profile_ ON review_.profileid = profile_.profileid
-      ORDER BY review_.timestamp DESC 
-      LIMIT 10
-    `;
-    const reviews = await reviewModel.queryDatabase(query);
+    const reviews = await reviewModel.getNewestReviews();
     res.json(reviews);
   } catch (error) {
     console.error('Virhe haettaessa arvosteluja:', error);
     res.status(500).send('Virhe haettaessa arvosteluja');
-  }
-}
-
-async function createReview(req, res) {
-  const { user_id, product_id, rating, comment, date_posted } = req.body;
-  try {
-    await reviewModel.createReview(user_id, product_id, rating, comment, date_posted);
-    res.status(201).send('Arvostelu lisätty onnistuneesti');
-  } catch (error) {
-    console.error('Virhe luotaessa arvostelua:', error);
-    res.status(500).send('Virhe luotaessa arvostelua');
   }
 }
 
@@ -76,13 +54,8 @@ async function createReview(req, res) {
 async function updateReview(req, res) {
   const idreview = req.params.id;
   const { review, rating } = req.body;
-  
   try {
-    const query = {
-      text: 'UPDATE Review_ SET review = $2, rating = $3 WHERE idreview = $1',
-      values: [idreview, review, rating ],
-    }; 
-    await reviewModel.queryDatabase(query); 
+    await reviewModel.updateReview(idreview, review, rating);
     res.send('Arvostelu päivitetty onnistuneesti');
   } catch (error) {
     console.error('Virhe päivitettäessä arvostelua:', error);
@@ -93,13 +66,8 @@ async function updateReview(req, res) {
 // arvostekun poistaminen reviewid:n perusteella
 async function deleteReview(req, res) {
   const id = req.params.id;
-  
   try {
-    const query = {
-      text: 'DELETE FROM Review_ WHERE idreview = $1',
-      values: [id],
-    };
-    await reviewModel.queryDatabase(query);
+    await reviewModel.deleteReview(id);
     res.send('Arvostelu poistettu onnistuneesti');
   } catch (error) {
     console.error('Virhe poistettaessa arvostelua:', error);
@@ -107,13 +75,63 @@ async function deleteReview(req, res) {
   }
 }
 
+// arvostelut käyttäjältä x esim. profiilisivulle
+async function getReviewsByProfile(req, res) {
+  const id = req.params.id;
+  try {
+    const reviews = await reviewModel.getReviewsByProfile(id);
+    res.json(reviews);
+  } catch (error) {
+    console.error('Virhe haettaessa arvosteluja:', error);
+    res.status(500).send('Virhe haettaessa arvosteluja');
+  }
+}
+
+async function getReviewsByItem(req, res) {
+  const id = req.params.id;
+  const mediatype = req.params.mediatype;
+  try {
+    const reviews = await reviewModel.getReviewsByItem(id, mediatype);
+    res.json(reviews);
+  } catch (error) {
+    console.error('Virhe haettaessa arvosteluja:', error);
+    res.status(500).send('Virhe haettaessa arvosteluja');
+  }
+}
+
+async function serieReviewExists(req, res) {
+
+  const tvShowId = req.params.id;
+  try {
+    const reviewExists = await reviewModel.serieReviewExists(tvShowId);
+    res.json({ reviewExists });
+  } catch (error) {
+    console.error('Virhe tarkistettaessa sarjan arvostelua:', error);
+    res.status(500).send('Virhe tarkistettaessa sarjan arvostelua');
+  }
+}
+
+async function updateReviewToAnon(req, res) {
+  const profileid = res.locals.profileid;
+  try {
+    await reviewModel.updateReviewToAnon(profileid);
+    res.send('Arvostelu päivitetty onnistuneesti');
+  } catch (error) {
+    console.error('Virhe päivitettäessä arvostelua:', error);
+    res.status(500).send('Virhe päivitettäessä arvostelua');
+  }
+}
+
 
 module.exports = {
   getAllReviews,
   getNewestReviews,
-  getReviewById,
-  createReview,
   updateReview,
   deleteReview,
   getReviewsByProfile,
+  movieReviewFromUser,
+  serieReviewFromUser,
+  getReviewsByItem,
+  serieReviewExists,
+  updateReviewToAnon
 };

@@ -1,40 +1,8 @@
 
-.gsection1 {
-    margin-top: 50px;
-    padding: 40px;
-    background-color: var(--section1);
-    border-radius: 10px;
-}
-
-.gsection2 {
-    margin-top: 50px;
-    padding: 40px;
-    background-color: var(--section2);
-    border: var(--solid);
-    border-radius: 10px;
-    box-shadow: var(--shadow02);
-}
-
-.gsection3 {
-    margin-top: 50px;
-    padding: 40px;
-    background-color: var(--section3);
-    border: var(--solid);
-    border-radius: 10px;
-    box-shadow: var(--shadow02);
-}
-
-
-.groupinfo {
-    padding: 5px;
-    font-size: 0.8em;
-    font-weight: 100;
-}
-
 .ginner-view {
     background-color: var(--grp-background);
     border-radius: 10px;
-    color: var(--grp-text);
+    color: var(--profile);
     display: flex; 
     flex-direction: row;
     flex-wrap: wrap; 
@@ -43,48 +11,28 @@
     border: var(--solid);
 }
 
-.ginner-left {
-    flex-basis: 19%;
-    padding: 10px;
-    text-align: left;
-}
-
-.ginner-right {
-    flex-basis: 78%;
-    padding: 8px;
-}
-
-.gthree-view {
-    margin-top: 25px;
+.gform-view {
     background-color: var(--grp-background);
     border-radius: 10px;
-    color: var(--grp-text);
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap; 
+    color: var(--profile);
+
     padding: 1em;
+    margin-top: 25px;
     border: var(--solid);
 }
 
-.gthree-left {
-    flex-basis: 30%;
+.ginner-view .ginner-left {
     padding: 10px;
-}
-
-.gthree-middle {
-    flex-basis: 30%;
-    padding: 10px;
-}
-
-.gthree-right {
-    flex-basis: 30%;
-    padding: 10px;
-}
-
-.ginner-view h2, 
-.gthree-view h2 {
+    margin-right: 10px;
     color: var(--profile);
-}   
+    text-align: left;
+}
+
+.ginner-view .ginner-right {
+    flex: 70%;
+    padding: 8px;
+    color: var(--profile);
+}
 
 .grouppic {
     border-radius: 5px;
@@ -99,4 +47,176 @@
 ul {
     list-style-type: none;
     padding: 8px;
+}
+
+
+
+.groupSections {
+    line-height: 1.8em;
+    list-style: decimal;
+}
+
+.groupSections li {
+    color: var(--profile);
+}
+
+.greviews-view {
+    background-color: var(--grp-background);
+    border-radius: 10px;
+    color: var(--profile);
+    display: flex-table;
+    flex-wrap: wrap;
+    padding: 1em;
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-top: 25px;
+    border: var(--solid);
+}
+
+.gmessages {
+    background-color: var(--section2);
+    border-radius: 10px;
+    color: var(--h2);
+    display: flex-table;
+    flex-wrap: wrap;
+    padding: 1em;
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-top: 5px;
+    border: var(--solid);
+}
+
+.gmessages h2 {
+    color: var(--h2);
+}
+
+.messageArea {
+    background-color: var(--grp-background);
+
+    border-radius: 10px;
+    color: var(--profile);
+    display: flex-table;
+    flex-wrap: wrap;
+    padding: 1em;
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-top: 5px;
+    border: var(--solid);
+}
+
+.messageArea a {
+    color: var(--strongCoffee);
+
+}
+
+.msgboard {
+    padding: 20px;
+}
+
+.msgRow {
+    display: block;
+    padding: 10px;
+    border-bottom: var(--dashedGr);
+}
+
+.newMessage {
+    padding: 20px;
+    width: 80%;
+}
+
+.someMargin {
+    margin-left: 23px;
+}
+
+.group-between {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.group-view {
+    display: flex-table;
+    flex-wrap: wrap;
+    width: 42%;
+    margin-top: 25px;
+    border-top-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+    background-color: var(--profile-view);
+    color: var(--profile);
+    padding: 1em;
+    padding-left: 3%;
+    border: var(--solid);
+}
+
+.justify {
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 30px;
+}
+
+.group-view a {
+    color: var(--profile);
+}
+
+.group-view a:hover {
+    color: var(--profile-link);
+}
+
+.group-content {
+    flex-basis: 90%;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+.group-middle {
+    flex-basis: 30%;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+.group-right {
+    flex-basis: 30%;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+.reviewinfo {
+    color: var(--profile);
+    font-size: 0.9em;
+    font-weight: 100;
+}
+
+.reviewtitle {
+    color: var(--profile);
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.reviewimg {
+    float: left;
+    margin-right: 20px;
+    height: 170px;
+    box-shadow: var(--shadow02);
+}
+
+.minheight {
+    min-height: 180px;
+    padding: 20px;
+    border-bottom: var(--dashedGr);
+}
+
+.minheight:hover {
+    background-color: var(--grey-hover);
+}
+
+.remove {
+    background-color: transparent; 
+    border: none; 
+    padding: 0; 
+}
+
+.ginner-view h2,
+.group-between h2,
+.greviews-view h2 {
+    color: var(--profile);
+    
 }

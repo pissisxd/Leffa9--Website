@@ -27,14 +27,14 @@
 #accountinfo .section3 {
     margin-top: 50px;
     padding: 40px;
-    background-color:  var(--table-bg);
+    background-color: var(--table-bg);
     border: var(--solid);
     border-radius: 10px;
     box-shadow: var(--shadow02);
 }
 
 #accountinfo .section2 h2,
-#accountinfo .section3 h2  {
+#accountinfo .section3 h2 {
     color: var(--h2);
 }
 
@@ -54,9 +54,9 @@
     background-color: var(--grp-background);
     border-radius: 10px;
     color: var(--profile);
-    display: flex; 
+    display: flex;
     flex-direction: row;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     padding: 1em;
     margin-top: 25px;
     border: var(--solid);
@@ -115,10 +115,13 @@
     margin: 0 auto;
 }
 
-.inner-view h2, 
-.three-view h2 {
+.inner-view h2,
+.three-view h2,
+.profile-view h2,
+.reviews-view h2 {
     color: var(--profile);
-}   
+}
+
 
 .profilepic {
     border-radius: 5px;
@@ -142,4 +145,95 @@ ul {
 
 .profileSections li {
     color: var(--profile);
+}
+
+.reviews-view {
+    background-color: var(--grp-background);
+    border-radius: 10px;
+    color: var(--profile);
+    display: flex-table;
+    flex-wrap: wrap;
+    padding: 1em;
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-top: 25px;
+    border: var(--solid);
+}
+
+.profile-between {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.profile-view {
+    display: flex-table;
+    flex-wrap: wrap;
+    width: 42%;
+    margin-top: 25px;
+    border-top-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+    background-color: var(--profile-view);
+    color: var(--profile);
+    padding: 1em;
+    padding-left: 3%;
+    border: var(--solid);
+}
+
+.profile-view a {
+    color: var(--profile);
+}
+
+.profile-view a:hover {
+    color: var(--profile-link);
+}
+
+.profile-content {
+    flex-basis: 90%;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+.profile-middle {
+    flex-basis: 30%;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+.profile-right {
+    flex-basis: 30%;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+.reviewinfo {
+    color: var(--profile);
+    font-size: 0.9em;
+    font-weight: 100;
+}
+
+.reviewtitle {
+    color: var(--profile);
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.reviewimg {
+    float: left;
+    margin-right: 20px;
+    height: 170px;
+    box-shadow: var(--shadow02);
+}
+
+.minheight {
+    min-height: 180px;
+    padding: 20px;
+    border-bottom: var(--dashedGr);
+}
+
+.minheight:hover {
+    background-color: var(--grey-hover);
+}
+
+input {
+    margin: 1em 0;
 }
