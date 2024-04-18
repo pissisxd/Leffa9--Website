@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const favoritelistService = require('./favoritelistService')
 router.use(express.json());
+const {auth,optionalAuth } = require('../middleware/auth')
 
 
 // mikään näistä ei ole vielä käytössä
@@ -10,6 +11,7 @@ router.get('/favoritelist/profile/:profileid', favoritelistService.getFavoriteli
 router.get('/favoritelist/group/:groupid', favoritelistService.getFavoritelistByGroup);
 router.post('/favoritelist', favoritelistService.createFavoritelist);
 router.delete('/favoritelist/:idfavoritelist', favoritelistService.deleteFavoritelist);
-router.get('/favoritelist/:profileid/favoriteditem', favoritelistService.getFavorite);
+router.get('/favoritelist/favoriteditem', optionalAuth, favoritelistService.getFavorite);
+router.post('/favoritelist/favoriteditem', optionalAuth, favoritelistService.addFavoritelist);
 
 module.exports = router;

@@ -54,13 +54,12 @@ const addToFavorites = async () => {
       if (profileId !== null) {
         if (movie && profileId) { 
           const data = {
-            favoriteditem: movie.name,
+            favoriteditem: movie.title,
             showtime: new Date(),
             groupid: null,
             profileId: profileId,
-            mediatype: 0,
           };
-          axios.post(`${VITE_APP_BACKEND_URL}/favoritelist/favoriteditem`, data)
+          axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, data)
             .then(response => {
               console.log(response.data);
               setIsFavorite(true); 

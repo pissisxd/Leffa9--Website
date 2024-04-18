@@ -6,14 +6,16 @@ import ReviewFormSerie from './ReviewFormSerie';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import './favoritebutton.css';
 import Reviews from './Reviews';
+import { getHeaders } from '@auth/token';
 
 const SeriesDetails = () => {
   const { id} = useParams();
   const { profilename } = useParams();
   const [series, setSeries] = useState(null);
   const [providers, setProviders] = useState(null);
-  const [profileId, setProfileId] = useState(null);
+  const [profileid, setProfileid] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const headers = getHeaders();
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -44,44 +46,47 @@ const SeriesDetails = () => {
     // Palautetaan poisto-funktio, joka suoritetaan komponentin purkamisen yhteydessä
     return () => clearTimeout(timeoutId);
   }, [id]);
-// lisätään suosikkeihin sarja
-console.log(series, profileId)
 
+
+// lisätään suosikkeihin sarja
+console.log(series, profilename)
 useEffect(() => {
   
   setIsFavorite();
 }, []);
 
-const addToFavorites = async (profileId) => {
+const addToFavorites = async () => {
   try {
-    await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileId}`);
-    if (series && profileId) { 
+   await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profilename}`, { headers });
+    if (profilename && series) { 
       const data = {
         favoriteditem: series.name,
         showtime: new Date(),
         groupid: null,
-        profileId: profileId,
+        profileid: profileid, 
       };
-      axios.post(`${VITE_APP_BACKEND_URL}/favoritelist/favoriteditem`, data)
-        .then(response => {
-          console.log(response.data);
-          setIsFavorite(true); 
-        })
-        .catch(error => {
-          console.error('Virhe lisättäessä suosikkeihin:', error);
-        });
+      
+      await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, data);
+
+      setIsFavorite(true); 
     } else {
-      console.error('Sarjaa tai profiilitunnistetta ei löydy');
+      console.error('Sarjaa tai profiilia ei löydy');
     }
   } catch (error) {
-    console.error('voi perkele nyt', error);
+    console.error('JEESUSKO EI TOIMI TÄMÄ ADDTOFAVORITES', error);
   }
-  setIsFavorite(true);
 };
-  // poistetaan suosikeista sarja
-  const deleteFromFavorites = () => {
-    setIsFavorite(false); // 
-  };
+
+// Poistetaan suosikeista sarja
+const deleteFromFavorites = async (favoriteditem) => {
+  try {
+    await axios.delete(`${VITE_APP_BACKEND_URL}/favoritelist/${favoriteditem}`);
+
+    setIsFavorite(false);
+  } catch (error) {
+    console.error('Virhe poistaessa suosikkia:', error);
+  }
+};
 
 
 
