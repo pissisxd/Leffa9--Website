@@ -8,6 +8,7 @@ import './favoritebutton.css';
 import Reviews from './Reviews';
 import { getHeaders } from '@auth/token';
 
+
 const SeriesDetails = () => {
   const { id} = useParams();
   const { profilename } = useParams();
@@ -49,23 +50,37 @@ const SeriesDetails = () => {
 
 
 // lisätään suosikkeihin sarja
-console.log(series, profilename)
+console.log(series, profileid)
 useEffect(() => {
-  
-  setIsFavorite();
-}, []);
+ /* const checkFavorite = async () => {
+    try {
+      const response = await axios.get(`${VITE_APP_BACKEND_URL}/favoritelist/${profileid}`, { headers });
+      setIsFavorite(response.data.length > 0);
+    } catch (error) {
+      console.error('Virhe tarkistaessa suosikkeja:', error);
+    }
+  };
 
-const addToFavorites = async () => {
+  checkFavorite(); */
+}, [profileid]);
+
+const addToFavorites = async (res, req) => {
+ // const profileid = res.locals.profileid;
   try {
-   await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profilename}`, { headers });
-    if (profilename && series) { 
+    if (!profileid) {
+      console.error('Profiili-id ei ole saatavilla');
+      return;
+    }
+    // Haetaan käyttäjän profileid ja sen jälkeen täytetään tiedot const data
+   await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileid}`, { headers });
+    if (profileid && series) { 
       const data = {
         favoriteditem: series.name,
         showtime: new Date(),
         groupid: null,
         profileid: profileid, 
       };
-      
+       // lisätään tässä suosikki suosikkilistaan 
       await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, data);
 
       setIsFavorite(true); 
@@ -77,7 +92,7 @@ const addToFavorites = async () => {
   }
 };
 
-// Poistetaan suosikeista sarja
+// Poistetaan suosikeista sarja EI OLE LOPULLINEN MUUTTUU VIELÄ, KOSKA EI OLE PYSTYTTY TESTAAMAAN!!!
 const deleteFromFavorites = async (favoriteditem) => {
   try {
     await axios.delete(`${VITE_APP_BACKEND_URL}/favoritelist/${favoriteditem}`);
