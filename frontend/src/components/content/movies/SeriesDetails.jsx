@@ -11,12 +11,14 @@ import { getHeaders } from '@auth/token';
 
 const SeriesDetails = () => {
   const { id} = useParams();
-  const { profilename } = useParams();
+  const { profilename} = useParams();
   const [series, setSeries] = useState(null);
   const [providers, setProviders] = useState(null);
-  const [profileid, setProfileid] = useState(null);
+  const [profileid = '22', setProfileid] = useState();
   const [isFavorite, setIsFavorite] = useState(false);
   const headers = getHeaders();
+
+  
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -50,9 +52,12 @@ const SeriesDetails = () => {
 
 
 // lisätään suosikkeihin sarja
-console.log(series, profileid)
-useEffect(() => {
- /* const checkFavorite = async () => {
+console.log("profileid", profileid);
+console.log("series", series);
+
+
+/*useEffect(() => {
+  const checkFavorite = async () => {
     try {
       const response = await axios.get(`${VITE_APP_BACKEND_URL}/favoritelist/${profileid}`, { headers });
       setIsFavorite(response.data.length > 0);
@@ -61,10 +66,10 @@ useEffect(() => {
     }
   };
 
-  checkFavorite(); */
-}, [profileid]);
+  checkFavorite(); 
+}, [profileid]); */
 
-const addToFavorites = async (res, req) => {
+const addToFavorites = async () => {
  // const profileid = res.locals.profileid;
   try {
     if (!profileid) {
@@ -72,26 +77,37 @@ const addToFavorites = async (res, req) => {
       return;
     }
     // Haetaan käyttäjän profileid ja sen jälkeen täytetään tiedot const data
-   await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileid}`, { headers });
-    if (profileid && series) { 
-      const data = {
-        favoriteditem: series.name,
-        showtime: new Date(),
-        groupid: null,
-        profileid: profileid, 
-      };
-       // lisätään tässä suosikki suosikkilistaan 
-      await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, data);
-
-      setIsFavorite(true); 
-    } else {
-      console.error('Sarjaa tai profiilia ei löydy');
-    }
-  } catch (error) {
-    console.error('JEESUSKO EI TOIMI TÄMÄ ADDTOFAVORITES', error);
+   //await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileid}`, { headers });
+   if (!profileid || !series || typeof series.name !== 'string') {
+    console.error('Sarjaa tai profiilia ei löydy');
+    return;
   }
-};
-
+      const response = await axios.get(`${VITE_APP_BACKEND_URL}/favoritelist/${profileid}?favoriteditem=${encodeURIComponent(series.name)}`, { headers });
+      const isAlreadyFavorite = response.data.length > 0;
+  
+      if (isAlreadyFavorite) {
+        // Poista sarja suosikkilistasta
+        await axios.delete(`${VITE_APP_BACKEND_URL}/favoritelist/${encodeURIComponent(series.name)}`);
+  
+        setIsFavorite(false);
+        console.log('Sarja poistettiin suosikkilistasta');
+      } else {
+        // Lisää sarja suosikkilistaan
+        const data = {
+          favoriteditem: series.name,
+          showtime: new Date(),
+          groupid: null,
+          profileid: profileid, 
+        };
+        await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, data);
+  
+        setIsFavorite(true); 
+        console.log('Sarja lisättiin suosikkilistaan');
+      }
+    } catch (error) {
+      console.error('Virhe suosikkitoiminnossa:', error);
+    }
+  };
 // Poistetaan suosikeista sarja EI OLE LOPULLINEN MUUTTUU VIELÄ, KOSKA EI OLE PYSTYTTY TESTAAMAAN!!!
 const deleteFromFavorites = async (favoriteditem) => {
   try {

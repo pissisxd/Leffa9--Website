@@ -9,6 +9,22 @@ async function queryDatabase(query) {
   }
 }
 
+async function reviewFromThisUser(profileid, revieweditem, mediatype) {
+  try {
+    console.log (profileid, revieweditem, mediatype);
+    const query = {
+      text: 'SELECT profileid, revieweditem, mediatype FROM Review_ WHERE profileid = $1 AND revieweditem = $2 AND mediatype = $3',
+      values: [profileid, revieweditem, mediatype],
+    };
+    result = await pool.query(query);
+    console.log(result.rows);
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error('Hakuvirhe:', error);
+    throw error;
+  }
+}
+
 async function movieReviewFromUser(profileid, mediatype, rating, review, revieweditem) {
 
   try {
@@ -110,10 +126,21 @@ async function getReviewsByItem(id, mediatype) {
 async function updateReviewToAnon(profileid) {
   try {
     const query = {
-      text: 'UPDATE Review_ SET profileid = 1 WHERE profileid = $1',
+      text: 'UPDATE Review_ SET profileid = NULL WHERE profileid = $1',
       values: [profileid],
     };
     await queryDatabase(query);
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getAnonReviews () {
+  try {
+    const query = {
+      text: 'SELECT * FROM Review_ WHERE profileid IS NULL',
+    };
+    return await queryDatabase(query);
   } catch (error) {
     throw error;
   }
@@ -130,5 +157,7 @@ module.exports = {
   getReviewsByProfile,
   serieReviewExists,
   getReviewsByItem,
-  updateReviewToAnon
+  updateReviewToAnon, 
+  getAnonReviews,
+  reviewFromThisUser,
 };

@@ -12,6 +12,7 @@ router.get('/favoritelist/group/:groupid', favoritelistService.getFavoritelistBy
 router.post('/favoritelist', favoritelistService.createFavoritelist);
 router.delete('/favoritelist/:idfavoritelist', favoritelistService.deleteFavoritelist);
 router.get('/favoritelist/favoriteditem', optionalAuth, favoritelistService.getFavorite);
-router.post('/favoritelist/favoriteditem', optionalAuth, favoritelistService.addFavoritelist);
+router.delete('/favorite/:idfavoritelist', favoritelistService.deleteFavorite);
+router.delete('/favoritelist/:groupid', favoritelistService.deleteFavoritelist);
 
 module.exports = router;

@@ -33,11 +33,30 @@ const { VITE_APP_BACKEND_URL } = import.meta.env;
 function App() {
   const { theme, toggleTheme } = useTheme();
   const [user, setUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [isburgerOpen, setIsburgerOpen] = useState(false);
 
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.header-container')) {
+        setShowLogin(false);
+        setIsburgerOpen(false);
+      }
+
+    };
+
+
+    document.body.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.body.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -83,20 +102,20 @@ function App() {
         <ThemeProvider>
           <ScrollToTop />
 
-          <div className={`body ${theme}`}>
+          <div className={`body ${theme}`}> 
             <Error />
-            <Header user={user} setUser={handleLogin} handleLogout={handleLogout} toggleTheme={toggleTheme} theme={theme} />
+            <Header user={user} setUser={handleLogin} handleLogout={handleLogout} toggleTheme={toggleTheme} theme={theme} showLogin={showLogin} setShowLogin={setShowLogin} isburgerOpen={isburgerOpen} setIsburgerOpen={setIsburgerOpen} />
             <Routes>
               <Route path="/" exact element={<Home />} />
               <Route path="/search" element={<Search />} />
-              <Route path="/movie/:id" element={<MovieDetails />} />
-              <Route path="/movie/:id/review" element={<ReviewForm />} />
-              <Route path="/series/:id" element={<SeriesDetails />} />
+              <Route path="/movie/:id" element={<MovieDetails user={user}/>} />
+              {/*<Route path="/movie/:id/review" element={<ReviewForm user={user}/>} />*/}
+              <Route path="/series/:id" element={<SeriesDetails user={user}/>} />
               <Route path="/login" element={<Login setUser={handleLogin} />} />
               <Route path="/myaccount" element={<MyAccount user={user} />} />
               <Route path="/profile/:profilename" element={<ProfileDetails user={user} />} />
               <Route path="/profile/:profilename/edit" element={<ProfileEdit />} />
-              <Route path="/community" element={<Community />} />
+              <Route path="/community" element={<Community user={user} />} />
               <Route path="/users" element={<UserList />} />
               <Route path="/groups" element={<AllGroups />} />
               <Route path="/reviews" element={<AllReviews />} />

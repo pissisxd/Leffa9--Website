@@ -18,15 +18,26 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get(`${VITE_APP_BACKEND_URL}/reviews`);
-      const reviewData = response.data;
+      const newReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/reviews`);
+      //const anonReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/anon`);
       
+      const newReviews = newReviewResponse.data;
+      //const anonReviews = anonReviewResponse.data;
+      
+      //const reviewData = [...newReviews, ...anonReviews];
+
+      const reviewData = newReviews;
+
       // Haetaan profiilitiedot
       const reviewsWithProfiles = await Promise.all(reviewData.map(async review => {
         try {
-          const userProfileResponse = await axios.get(`${VITE_APP_BACKEND_URL}/profile/id/${review.profileid}`);
-          const userProfileData = userProfileResponse.data;
-          return { ...review, userProfile: userProfileData };
+          if (review.profileid !== null) {
+            const userProfileResponse = await axios.get(`${VITE_APP_BACKEND_URL}/profile/id/${review.profileid}`);
+            const userProfileData = userProfileResponse.data;
+            return { ...review, userProfile: userProfileData };
+          } else {
+            return review;
+          }
         } catch (error) {
           console.error('Error fetching profile:', error);
           return review;
@@ -66,15 +77,6 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
       console.error('Hakuvirhe:', error);
     }
   };
-  
-
-  const renderRatingIcons = (rating) => {
-    const ratingIcons = [];
-    for (let i = 0; i < rating; i++) {
-      ratingIcons.push(<span key={i} className="review uni06"></span>);
-    }
-    return ratingIcons;
-  };
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -103,8 +105,8 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
         ) : (
           <>
             <li className="userinfo">
-              Palvelussa on <b>{filteredReviews.length}</b> arvostelua ja niiden keskiarvo 
-              on <b>{filteredReviews.length > 0 && (filteredReviews.reduce((sum, review) => sum + review.rating, 0) / filteredReviews.length).toFixed(1)}</b>.<br />
+              Palvelussa on <b>{reviews.length}</b> arvostelua ja niiden keskiarvo 
+              on <b>{reviews.length > 0 && (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)}</b>.<br />
               Voit luoda uusia arvosteluja elokuvien ja sarjojen sivuilta. <br />
             </li>
   
@@ -141,9 +143,23 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
                 )}    
   
                 <br/>
-                <span>{renderRatingIcons(review.rating)}</span>
+                {[...Array(review.rating)].map((_, i) => (
+                    <span key={i} >&#11088;</span>
+                ))}
+                  {[...Array(5 - review.rating)].map((_, i) => (
+                    <span key={i + review.rating}>&#x2605;</span>
+                ))}
                 <span className='userinfo'>| <b>{review.rating}/5</b> tähteä</span> <br />
-                <span className='reviewinfo'><span className='reviewinfo'>{formatDate(review.timestamp)}</span> | <Link className="reviewitems" to={`/profile/${review.userProfile.profilename}`}>{review.userProfile.profilename}</Link></span> <br />
+                <span className='reviewinfo'>
+                  <span className='reviewinfo'>{formatDate(review.timestamp)}</span> | &nbsp;
+                  {review.userProfile && review.userProfile.profilename !== undefined ? (
+                    <Link className="reviewitems" to={`/profile/${review.userProfile.profilename}`}>
+                      {review.userProfile.profilename}
+                    </Link>
+                  ) : (
+                    <i>anonyymi</i>
+                  )}
+                </span><br />
                 <span className='userinfo'>{review.review}</span> <br />
               </li>
             ))}

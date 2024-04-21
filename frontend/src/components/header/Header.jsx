@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Login from './Login';
 
-const Header = ({ user, setUser, handleLogout, toggleTheme }) => {
-  const [isburgerOpen, setIsburgerOpen] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-
+const Header = ({ user, setUser, handleLogout, toggleTheme, showLogin, setShowLogin, isburgerOpen, setIsburgerOpen }) => {
+  
   const toggleburger = () => {
     setIsburgerOpen(!isburgerOpen);
   };
