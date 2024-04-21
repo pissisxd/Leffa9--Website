@@ -64,13 +64,13 @@ async function getFavoritelistByGroup(req, res) {
         if (groupid || profileid) {
             if (groupid) {
                 favoritelistQuery = {
-                    text: 'INSERT INTO favoritelist_ (groupid, favoriteditem, showtime, timestamp) VALUES ($1, $2, $3, $4)',
-                    values: [groupid, favoriteditem, showtime, now],
+                    text: 'INSERT INTO favoritelist_ (groupid, favoriteditem, showtime, timestamp, mediatype) VALUES ($1, $2, $3, $4, $5)',
+                    values: [groupid, favoriteditem, showtime, now, mediatype],
                 };
             } else {
                 favoritelistQuery = {
-                    text: 'INSERT INTO favoritelist_ (profileid, favoriteditem, showtime, timestamp) VALUES ($1, $2, $3, $4)',
-                    values: [profileid, favoriteditem, showtime, now],
+                    text: 'INSERT INTO favoritelist_ (profileid, favoriteditem, showtime, timestamp, mediatype) VALUES ($1, $2, $3, $4, $5)',
+                    values: [profileid, favoriteditem, showtime, now, mediatype],
                 };
             }
             await favoritelistModel.queryDatabase(favoritelistQuery);
@@ -115,6 +115,21 @@ async function getFavoritelistByGroup(req, res) {
         res.status(500).send('Virhe poistettaessa listaa');
       }
     };
+    async function deletePIDFavoritelist(req, res) {
+      const profileid = req.params.profileid;
+      try {
+        const query = {
+          text: 'DELETE FROM favoritelist_ WHERE profileid = $1',
+          values: [profileid],
+        };
+    
+        const result = await favoritelistModel.queryDatabase(query);
+          res.send(`Lista poistettu onnistuneesti`);
+      } catch (error) {
+        console.error('Virhe poistettaessa listaa:', error);
+        res.status(500).send('Virhe poistettaessa listaa');
+      }
+    }
     async function getFavorite(req, res) {
       try {
         // const profileid = res.locals.profileid; 
@@ -147,4 +162,5 @@ async function getFavoritelistByGroup(req, res) {
     getFavoritelistByProfile,
     getFavoritelistByGroup,
     getFavorite,
+    deletePIDFavoritelist,
   };

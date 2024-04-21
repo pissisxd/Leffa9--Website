@@ -9,18 +9,41 @@ import Reviews from './Reviews';
 import { getHeaders } from '@auth/token';
 
 
-const SeriesDetails = () => {
+const SeriesDetails = ({user}) => {
   const { id} = useParams();
   const { profilename} = useParams();
   const [series, setSeries] = useState(null);
   const [providers, setProviders] = useState(null);
-  const [profileid = '22', setProfileid] = useState();
+  const [profileid, setProfileid] = useState();
   const [isFavorite, setIsFavorite] = useState(false);
   const headers = getHeaders();
 
   
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+          const token = sessionStorage.getItem('token');
+          const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          };
+          console.log("Token from sessionStorage:", token);
+          console.log("Profilename from token:", user);
+          const response = await axios.get(`${VITE_APP_BACKEND_URL}/profile/${user.user}`);
+
+          console.log("Response from profile id:", response.data.profileid);
+
+          setProfileid(response.data.profileid);
+
+          console.log("Response from profile:", response.data);
+      } catch (error) {
+          console.error('Virhe haettaessa profiilitietoja:', error);
+      }
+  };
+
+  fetchProfile();
+
     const fetchSeries = async () => {
       try {
         const response = await axios.get(`${VITE_APP_BACKEND_URL}/series/${id}`);
@@ -48,7 +71,7 @@ const SeriesDetails = () => {
 
     // Palautetaan poisto-funktio, joka suoritetaan komponentin purkamisen yhteydessä
     return () => clearTimeout(timeoutId);
-  }, [id]);
+  }, [id, user]);
 
 
 // lisätään suosikkeihin sarja
@@ -77,37 +100,27 @@ const addToFavorites = async () => {
       return;
     }
     // Haetaan käyttäjän profileid ja sen jälkeen täytetään tiedot const data
-   //await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileid}`, { headers });
-   if (!profileid || !series || typeof series.name !== 'string') {
-    console.error('Sarjaa tai profiilia ei löydy');
-    return;
-  }
-      const response = await axios.get(`${VITE_APP_BACKEND_URL}/favoritelist/${profileid}?favoriteditem=${encodeURIComponent(series.name)}`, { headers });
-      const isAlreadyFavorite = response.data.length > 0;
-  
-      if (isAlreadyFavorite) {
-        // Poista sarja suosikkilistasta
-        await axios.delete(`${VITE_APP_BACKEND_URL}/favoritelist/${encodeURIComponent(series.name)}`);
-  
-        setIsFavorite(false);
-        console.log('Sarja poistettiin suosikkilistasta');
-      } else {
-        // Lisää sarja suosikkilistaan
-        const data = {
-          favoriteditem: series.name,
-          showtime: new Date(),
-          groupid: null,
-          profileid: profileid, 
-        };
-        await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, data);
-  
-        setIsFavorite(true); 
-        console.log('Sarja lisättiin suosikkilistaan');
-      }
-    } catch (error) {
-      console.error('Virhe suosikkitoiminnossa:', error);
+    //await axios.get(`${VITE_APP_BACKEND_URL}/profile/${profileid}`, { headers });
+    if (profileid && series && typeof series.name === 'string') { 
+      const data = {
+        favoriteditem: series.name,
+        showtime: new Date(),
+        groupid: null,
+        profileid: profileid,
+        mediatype: 1
+      };
+       // lisätään tässä suosikki suosikkilistaan 
+      await axios.post(`${VITE_APP_BACKEND_URL}/favoritelist`, data);
+
+      setIsFavorite(true); 
+    } else {
+      console.error('Sarjaa tai profiilia ei löydy');
     }
-  };
+  } catch (error) {
+    console.error('JEESUSKO EI TOIMI TÄMÄ ADDTOFAVORITES', error);
+  }
+};
+
 // Poistetaan suosikeista sarja EI OLE LOPULLINEN MUUTTUU VIELÄ, KOSKA EI OLE PYSTYTTY TESTAAMAAN!!!
 const deleteFromFavorites = async (favoriteditem) => {
   try {
