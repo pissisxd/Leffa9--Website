@@ -76,6 +76,7 @@ body {
   background: linear-gradient(67deg, #0b0c0f, #0b2b55, #0b2b55, #0b2b55, #0b2b55, #0b0c0f);
   z-index: 2;
 }
+
 #header-bar .header-container {
   margin: 0;
   margin-left: 70px;
@@ -110,16 +111,16 @@ body {
   color: var(--blueish);
 }
 
-#header-bar ul.navigate li {
+/*#header-bar ul.navigate li {
   padding-left: 15px;
   padding-right: 15px;
-}
+}*/
 
-#header-bar .boxLink a {
+/*#header-bar .boxLink a {
   margin-left: -70px;
   padding-left: 30px;
   font-size: 0.8em;
-}
+}*/
 
 h1 {
   margin: 0 auto;
@@ -127,10 +128,20 @@ h1 {
   font-optical-sizing: auto;
   font-weight: 500;
   font-style: normal;
-  font-size: 2.5em;
+  font-size: 2.6em;
   text-shadow: 0px 0px 15px rgba(0, 0, 0, 1);
   animation: headerWave 7s infinite linear;
 }
+
+.section3 h1,
+.section2 h1 {
+  color: var(--sideLinks) !important;
+  font-size: 2.5em;
+  font-weight:  600;
+  text-shadow: none;
+  animation: none;
+}
+
 
 @keyframes headerWave {
   0% { color: rgb(241, 107, 152); }
@@ -159,7 +170,8 @@ h1 {
   top: 50px;
   right: 40px;
   font-size: 1em;
-  padding-left: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .login-menu.active {
@@ -193,7 +205,7 @@ h1 {
   bottom: 0;
   width: 100%;
   justify-content: center;
-  padding-top: 30px;
+  padding-top: 34px;
   align-items: center;
   border-top: 3px solid #0b0c0f;
   background: #342f2a;
@@ -210,6 +222,15 @@ h1 {
 #footer a:hover {
   color: var(--footer-hover);
 }
+
+.gh-mark {
+  width: 30px;
+  height: 30px;
+  margin-right: 5px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
 /******* CONTENT incl. PAGES AND COMPONENTS *******/
 
 .content {
@@ -475,4 +496,8 @@ input  {
 .faq {
   margin-top: 40px;
   margin-left: 20px;
+}
+
+.colored {
+  color: #633912;
 }

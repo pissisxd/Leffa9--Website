@@ -5,7 +5,7 @@ const { VITE_APP_BACKEND_URL } = import.meta.env;
 import ReviewForm from './ReviewForm';
 import Reviews from './Reviews';
 
-const MovieDetails = () => {
+const MovieDetails = (user) => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [providers, setProviders] = useState(null);
@@ -41,17 +41,21 @@ const MovieDetails = () => {
 
 
   return (
+
+    <>
     <div id="backdrop" style={movie && { backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`, backgroundSize: 'cover' }}>
       <div className="content">
 
         {movie && (
-          <div id="backdropbg">
+          <>
 
             <div className="moviemain">
               <img className="posterimg" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
 
               <div className="movieinfo">
+              {movie && (
 
+                <>
                 <h2>{movie.title}</h2>
                 <p><b>Kuvaus:</b> {movie.overview}</p>
                 <p><b>Kesto:</b> {movie.runtime} min</p>
@@ -61,51 +65,53 @@ const MovieDetails = () => {
                 <p><b>Kerännyt ääniä:</b> {movie.vote_count}</p>
                 <p><b>Äänten keskiarvo:</b> {movie.vote_average} / 10 </p>
 
-
                 {providers && providers.flatrate && providers.rent && (
-                  <table className='providers'>
-                    <tbody>
-                      <tr>
-                        <td><h3>Katso</h3></td>
+                    <>
+                      <p><b>Katsottavissa:</b> <br/>
                         {providers.flatrate.map(provider => (
-                          <td key={provider.provider_id}>
-                            <a href={`https://www.themoviedb.org/movie/${movie.id}/watch`}><img src={`https://image.tmdb.org/t/p/w185${provider.logo_path}`} alt={provider.provider_name} /></a>
-                          </td>
+                          <span key={provider.provider_id}>
+                            <a href={`https://www.themoviedb.org/movie/${movie.id}/watch`}><img className='tinyImg' src={`https://image.tmdb.org/t/p/w185${provider.logo_path}`} alt={provider.provider_name} /></a>
+                          </span>
                         ))}
-                      </tr>
-                      <tr>
-                        <td><h3>Vuokraa</h3></td>
+                      </p>
+
+                      <p><b>Vuokrattavissa:</b> <br/>
                         {providers.rent.map(provider => (
-                          <td key={provider.provider_id}>
-                            <a href={`https://www.themoviedb.org/movie/${movie.id}/watch`}><img src={`https://image.tmdb.org/t/p/w185${provider.logo_path}`} alt={provider.provider_name} /></a>
-                          </td>
+                          <span key={provider.provider_id}>
+                            <a href={`https://www.themoviedb.org/movie/${movie.id}/watch`}><img className='tinyImg' src={`https://image.tmdb.org/t/p/w185${provider.logo_path}`} alt={provider.provider_name} /></a>
+                          </span>
                         ))}
-                      </tr>
-                      <tr>
-                        <td colSpan="6">
-                          <a href='https://www.justwatch.com/'>Saatavuus Suomessa JustWatch</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                )}
+                      </p>
+
+                      <p>
+                        <a href='https://www.justwatch.com/'>Saatavuus Suomessa JustWatch</a>
+                      </p>
+                    </>
+                  )}
+                </>
+              )}
                 
               </div>
             </div>
 
+            
+
             <div className="moviereviews">
 
-              <div><ReviewForm movieId={id} /></div>
+              <div><ReviewForm movieId={id} user={user} /></div>
 
               <br/>
               <h2>Viimeisimmät arvostelut</h2>
 
               <div className="reviewslisted"><Reviews movieId={id} mediatype={0}/></div>
             </div>
-          </div>
+
+          </>
+          
         )}
       </div>
     </div>
+    </>
   );
 };
 

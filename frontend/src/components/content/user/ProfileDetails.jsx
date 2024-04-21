@@ -16,6 +16,7 @@ const ProfileDetails = ({ user }) => {
     const [editMode, setEditMode] = useState(false);
     const [isOwnProfile, setOwnProfile] = useState(false);
     const [isPrivate, setPrivate] = useState(false);
+    const [loading, setLoading] = useState(true);
     const headers = getHeaders();
 
     useEffect(() => {
@@ -26,7 +27,7 @@ const ProfileDetails = ({ user }) => {
                 setProfile(response.data);
                 setOwnProfile(response.data.isOwnProfile);
                 setPrivate(response.data.is_private);
-
+                setLoading(false);
 
             } catch (error) {
                 console.error('Virhe haettaessa profiilitietoja:', error);
@@ -61,9 +62,19 @@ const ProfileDetails = ({ user }) => {
 
     return (
         <div className="content">
+            {loading ? (
+                <div>Ladataan sisältöä</div>
+            ) : (
+                <>
             <div className="inner-view">
                 <div className="inner-left">
-                    <img src={profile?.profilepicurl || ''} className="profilepic" alt="Käyttäjän kuva" />
+     
+                        <img 
+                            src={profile?.profilepicurl ? profile.profilepicurl : '/pic.png'} 
+                            className="profilepic" 
+                            alt="Käyttäjän kuva" 
+                        />
+
                     {(!isPrivate || isOwnProfile) && <span className='userinfo'>Viimeksi kirjautuneena: {formatDate(lastLoggedIn)}</span>}
 
                     {(isOwnProfile && !editMode) && <button onClick={() => setEditMode(true)} className="basicbutton">Muokkaa profiilia</button>}
@@ -110,8 +121,12 @@ const ProfileDetails = ({ user }) => {
                     </div>
 
                 </>
+                )}
+
+                </>
 
             )}
+            
         </div>
     );
 };

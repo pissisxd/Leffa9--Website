@@ -1,5 +1,26 @@
 const groupModel = require('./groupModel');
 
+
+const getNewestGroup = async (req, res) => {
+    try {
+      const newestGroup = await groupModel.getNewestGroup();
+      res.json(newestGroup);
+    } catch (error) {
+      console.error('Error fetching newest group:', error);
+      res.status(500).send('Error fetching newest group');
+    }
+  };
+  
+  const getPopularGroup = async (req, res) => {
+    try {
+      const popularGroup = await groupModel.getPopularGroup();
+      res.json(popularGroup);
+    } catch (error) {
+      console.error('Error fetching popular group:', error);
+      res.status(500).send('Error fetching popular group');
+    }
+  };
+
 async function getAllGroups(req, res) {
     try {
         const groups = await groupModel.getAllGroups();
@@ -67,11 +88,10 @@ async function updateGroupById(req, res) {
 }
 
 async function createGroup(req, res) {
-    const { groupname, groupexplanation, profileid } = req.body;
+    const groupname = req.body.groupname;
     try {
-        await groupModel.createGroup(groupname, groupexplanation);
-        await groupModel.addMemberToGroup(profileid, groupid);
-        res.send('Uusi ryhmä luotu ja jäsen lisätty');
+        const groupid = await groupModel.createGroup(groupname); 
+        res.send(groupid);
     } catch (error) {
         console.error('Virhe luotaessa ryhmää:', error);
         res.status(500).send('Virhe luotaessa ryhmää');
@@ -89,6 +109,30 @@ async function createMember(req, res) {
     } catch (error) {
         console.error('Virhe lisätessä jäsentä ryhmään:', error);
         res.status(500).send('Virhe lisätessä jäsentä ryhmään');
+    }
+}
+
+async function updateMemberStatus(req, res) {
+    const memberlistid = req.params.memberlistid;
+    const pending = req.params.pending;
+    try {
+        await groupModel.updateMemberStatus(memberlistid, pending);
+        res.send('Jäsenen tila päivitetty onnistuneesti');
+    } catch (error) {
+        console.error('Virhe päivitettäessä jäsenen tilaa:', error);
+        res.status(500).send('Virhe päivitettäessä jäsenen tilaa');
+    }
+}
+
+async function updateMemberRank(req, res) {
+    const memberlistid = req.params.memberlistid;
+    const mainuser = req.params.mainuser;
+    try {
+        await groupModel.updateMemberRank(memberlistid, mainuser);
+        res.send('Jäsenen tila päivitetty onnistuneesti');
+    } catch (error) {
+        console.error('Virhe päivitettäessä jäsenen tilaa:', error);
+        res.status(500).send('Virhe päivitettäessä jäsenen tilaa');
     }
 }
 
@@ -172,6 +216,17 @@ async function deleteMember(req, res) {
     }
 }
 
+async function deleteMemberlist(req, res) {
+    const groupid = req.params.groupid;
+    try {
+        await groupModel.deleteMemberlist(groupid);
+        res.send('Jäsenlista poistettu onnistuneesti');
+    } catch (error) {
+        console.error('Virhe poistettaessa jäsenlistaa:', error);
+        res.status(500).send('Virhe poistettaessa jäsenlistaa');
+    }
+}
+
 async function createMemberList(req, res) {
     const { profileid, mainuser, groupid, pending } = req.body;
     try {
@@ -205,6 +260,8 @@ module.exports = {
     updateGroupById,
     createGroup,
     createMember,
+    updateMemberStatus,
+    updateMemberRank,
     getMessagesById,
     createMessage,
     deleteMessage,
@@ -213,5 +270,8 @@ module.exports = {
     GetMemberList,
     getMemberStatus,
     deleteMember,
-    createMemberList
+    deleteMemberlist,
+    createMemberList,
+    getNewestGroup,
+    getPopularGroup,
 };

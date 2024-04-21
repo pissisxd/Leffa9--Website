@@ -13,11 +13,16 @@ const Latestreviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(`${VITE_APP_BACKEND_URL}/review/new`);
-        const reviewData = response.data;
+        const newReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/review/new`);
+        const anonReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/anon`);
+        
+        const newReviews = newReviewResponse.data;
+        const anonReviews = anonReviewResponse.data;
+        
+        const allReviews = [...newReviews, ...anonReviews];
 
         // Hae jokaisen arvostelun review.revieweditem arvolla liittyvä elokuva
-        const reviewsWithMovies = await Promise.all(reviewData.map(async review => {
+        const reviewsWithMovies = await Promise.all(allReviews.map(async review => {
           try {
             let responseData;
             if (review.mediatype === 0) {
@@ -94,7 +99,7 @@ const Latestreviews = () => {
                   </td>
                   
                   <td className="review-info">
-                    <h2>{review.data.title}{review.data.name}</h2>
+                    <h2><Link to={`/movie/${review.revieweditem}`} className="titleHover">{review.data.title}{review.data.name}</Link></h2>
                     <p><b>Arvostelu: </b> {review.review}</p>
                     <p><b>Arvosteltu: </b>{new Date(review.timestamp).toLocaleString('fi-FI', {
                       day: 'numeric',
@@ -103,7 +108,15 @@ const Latestreviews = () => {
                       hour: 'numeric',
                       minute: 'numeric',
                     })}</p>
-                    <p><b>Arvostelija: </b> {review.profilename}</p>
+                    <p><b>Arvostelija: </b>   
+                    {review.profilename ? (
+                    <Link className="link-style" to={`/profile/${review.profilename}`}>
+                    {review.profilename}
+                    </Link>
+                    ) : (
+                    <i>anonyymi</i>
+                    )}
+                    </p>
                   </td>
                 </tr>
               </tbody>
