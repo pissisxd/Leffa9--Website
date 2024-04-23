@@ -80,7 +80,7 @@ async function getFavoritelistByGroup(req, res) {
         }
     } catch (error) {
         console.error('Virhe lisättäessä suosikkilistaa:', error);
-        res.status(500).send('Virhe lisättäessä suosikkilistaa');
+        
     }
   }
 

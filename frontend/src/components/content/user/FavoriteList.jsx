@@ -26,11 +26,11 @@ useEffect(() => {
 }, []);
 
 // poistetaan suosikeista suosikki
-const handleDeleteFavorite = async (idfavoritelist) => {
+const DeleteFavorite = async (profileid, favoriteditem) => {
   try {
-    await axios.delete(`${VITE_APP_BACKEND_URL}/favoritelist/${idfavoritelist}`);
+    await axios.delete(`${VITE_APP_BACKEND_URL}/favoritelist/${profileid}/${favoriteditem}`);
     console.log(response.data);
-    setFavorites(favorites.filter(favorite => favorite.idfavoritelist !== idfavoritelist));
+    setFavorites(favorites.filter(favorite => favorite.favoriteditem !== favoriteditem));
     setConfirmDeleteId(null);
   } catch (error) {
   }
@@ -61,7 +61,7 @@ const currentFavorites = favorites.slice(indexOfFirstFavorite, indexOfLastFavori
   <li key={index}>
     <Link to="#">{favorite.favoriteditem}</Link>
     {isOwnProfile && (
-    <button onClick={() => handleDeleteFavorite(favorite.idfavoritelist)}>Poista</button> ) }
+    <button onClick={() => DeleteFavorite(favorite.favoriteditem)}>Poista</button> ) }
   </li>
 ))}
       </ul>
