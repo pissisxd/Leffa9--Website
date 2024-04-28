@@ -8,10 +8,8 @@ import './movies.css';
 import Reviews from './Reviews';
 import { getHeaders } from '@auth/token';
 
-
-const SeriesDetails = ({user}) => {
-  const { id} = useParams();
-  const { profilename} = useParams();
+const SeriesDetails = (user) => {
+  const { id } = useParams();
   const [series, setSeries] = useState(null);
   const [providers, setProviders] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false); 
@@ -188,17 +186,16 @@ const indexOfFirstGroup = indexOfLastGroup - groupsPerPage;
 const currentGroups = groups.slice(indexOfFirstGroup, indexOfLastGroup);
 
   return (
+    <>
     <div id="backdrop" style={series && { backgroundImage: `url(https://image.tmdb.org/t/p/original${series.backdrop_path})`, backgroundSize: 'cover' }}>
       <div className="content">
+
         {series && (
-          <div id="backdropbg">
+          <>
+
             <div className="moviemain">
-            <div style={{ position: 'relative' }}>
-        <button className="favorite-button" onClick={isFavorite ? deleteFromFavorites : addToFavorites}>
-        {isFavorite ? <FaHeart className="favorite-icon" size={34} /> : <FaRegHeart size={34} />}
-        </button>
-        <img className="poster-img" src={`https://image.tmdb.org/t/p/w342${series.poster_path}`} alt={series.title} />
-      </div>
+              <img className="posterimg" src={`https://image.tmdb.org/t/p/w342${series.poster_path}`} alt={series.title} />
+
               <div className="movieinfo">
                 <>
                 <div className="flex-container">
@@ -297,10 +294,13 @@ const currentGroups = groups.slice(indexOfFirstGroup, indexOfLastGroup);
 
             <div className="reviewslisted"><Reviews movieId={id} mediatype={1} adult={series.adult}/></div>
             </div>
-            </div>
+            
+          </>
         )}
+
       </div>
     </div>
+    </>
   );
 };
 

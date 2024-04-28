@@ -200,12 +200,8 @@ const MovieDetails = (user) => {
           <>
 
             <div className="moviemain">
-            <div style={{ position: 'relative' }}>
-            <button className="favorite-button" onClick={isFavorite ? deleteFromFavorites : addToFavorites}>
-            {isFavorite ? <FaHeart className="favorite-icon" size={34} /> : <FaRegHeart size={34} />}
-          </button>
               <img className="posterimg" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
-              </div>
+
               <div className="movieinfo">
               {movie && (
 
