@@ -78,7 +78,6 @@ async function changePassword(hashedpassword, profileid) {
     };
     await pool.query(query);
 }
-
 module.exports = {
     getUserByUsername,
     createUser,

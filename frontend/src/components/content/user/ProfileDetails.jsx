@@ -46,7 +46,6 @@ const ProfileDetails = ({ user }) => {
             const timestamp = new Date().toLocaleString();
             setLastLoggedIn(timestamp);
         };
-
         simulateLogin();
     }, [user]);
 
@@ -67,7 +66,9 @@ const ProfileDetails = ({ user }) => {
                         />
 
         
-
+<div className="last-login-info">
+                        Viimeksi kirjautunut: <br></br><DatabaseDateTime />
+                    </div>
                     {(isOwnProfile && !editMode) && <button onClick={() => setEditMode(true)} className="basicbutton">Muokkaa profiilia</button>}
                 </div>
 
@@ -121,7 +122,7 @@ const ProfileDetails = ({ user }) => {
     );
 };
 // viimeksi kirjautunu TURHA???
- /* const DatabaseDateTime = () => {
+ const DatabaseDateTime = () => {
     const [dateTimeFromDatabase, setDateTimeFromDatabase] = useState('');
     const { profilename } = useParams();
     useEffect(() => {
@@ -144,5 +145,5 @@ const ProfileDetails = ({ user }) => {
             {dateTimeFromDatabase}
         </SimpleDateTime>
     ); 
-    };  */
+    };  
 export default ProfileDetails;
