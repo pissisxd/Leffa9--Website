@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import './movies.css'; // Sisällytä CSS-tiedosto suoraan komponenttiin
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
-
 const Reviews = ({ movieId, mediatype }) => {
   const [reviews, setReviews] = useState([]);
+  const [reviewsPerPage, setReviewsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -16,7 +16,6 @@ const Reviews = ({ movieId, mediatype }) => {
         const response = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/${movieId}/${mediatype}`);
         const reviewData = response.data;
 
-        // Hae jokaisen arvostelun review.revieweditem arvolla liittyvä elokuva
         const reviewsWithMovies = await Promise.all(reviewData.map(async review => {
           try {
             let responseData;
@@ -27,29 +26,29 @@ const Reviews = ({ movieId, mediatype }) => {
               const tvResponse = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}/series/${encodeURIComponent(review.revieweditem)}`);
               responseData = tvResponse.data;
             }
-            console.log(responseData)
-            // Haetaan profiilitiedot
-            const profileResponse = await axios.get(`${VITE_APP_BACKEND_URL}/profile/id/${review.profileid}`);
-            const profileData = profileResponse.data;
+            
+            let profileData = {}; 
 
-            if (profileResponse && profileResponse.data) {
+            if (review.profileid !== null) {
+              const profileResponse = await axios.get(`${VITE_APP_BACKEND_URL}/profile/id/${review.profileid}`);
+              profileData = profileResponse.data; 
+            } else {
+              profileData.profilename = 'anonyymi';
+              profileData.eilink = 'true';
+            }
+            
             return {
               ...review,
               data: responseData,      
               profile: profileData,
             };
-          } else {
-            console.error('Profiilitiedon hakeminen epäonnistui:', profileResponse);
-            return {};
-          }
+
           } catch (error) {
             console.error('Virhe tiedon hakemisessa:', error);
-            // Palauta tyhjä objekti, jos hakeminen epäonnistuu
             return {};
           }
         }));
 
-        // Suodata pois tyhjät arvostelut ja aseta arvostelut
         setReviews(reviewsWithMovies.filter(review => Object.keys(review).length !== 0));
         setLoading(false);
       } catch (error) {
@@ -61,7 +60,9 @@ const Reviews = ({ movieId, mediatype }) => {
     fetchReviews();
   }, [movieId, mediatype]);
 
-
+  const indexOfLastReview = currentPage * reviewsPerPage;
+  const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+  const currentReviews = reviews.slice(indexOfFirstReview, indexOfLastReview); 
 
   return (
     <>
@@ -69,7 +70,19 @@ const Reviews = ({ movieId, mediatype }) => {
         <p>Ladataan arvosteluja...</p>
       ) : (
         <div>
-          {reviews.map((review, index) => (
+            {reviews.length > reviewsPerPage && (
+              <ul className="pagination">
+                  <li>
+                      <button className="buttonnext" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}>
+                    &#9664; </button>
+                    &nbsp; <span className="movieinfo">sivu {currentPage} / {Math.ceil(reviews.length / reviewsPerPage)}</span> &nbsp;
+                    <button className="buttonnext" onClick={() => setCurrentPage(currentPage < Math.ceil(reviews.length / reviewsPerPage) ? currentPage + 1 : Math.ceil(reviews.length / reviewsPerPage))}>
+                      &#9654; </button>
+                  </li>
+              </ul>
+            )}
+
+          {currentReviews.map((review, index) => (
   
             <div key={index}>
                 <b>Lähetetty:</b> {new Date(review.timestamp).toLocaleString('fi-FI', {
@@ -79,7 +92,11 @@ const Reviews = ({ movieId, mediatype }) => {
                       hour: 'numeric',
                       minute: 'numeric',
                     })} <br />
-                <b>Käyttäjältä:</b> <i><Link to={`/profile/${review.profile.profilename}`}>{review.profile.profilename}</Link></i> <br />
+                <b>Käyttäjältä:</b>&nbsp; 
+                {(review.profile.eilink !== "true") && <b><Link to={`/profile/${review.profile.profilename}`}>{review.profile.profilename}</Link></b>}
+                {(review.profile.eilink === "true") && <i>Anonyymi</i> }
+                
+                 <br /> 
                 <b>Arvio:</b>                             
                   {[...Array(review.rating)].map((_, i) => (
                     <span key={i} >&#11088;</span>
@@ -91,8 +108,6 @@ const Reviews = ({ movieId, mediatype }) => {
                 <b>Perustelut:</b> <br />
                 {review.review}<br /><br />
             </div>
-              
-            
           ))}
         </div>
       )}

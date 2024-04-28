@@ -44,10 +44,24 @@ async function loginUser(username, password) {
     }
 }
 
-async function getProfileIdByName(profilename) {
+async function getUserTypeByUsername(username) {
     try {
-        const result = await authModel.getProfileIdByName(profilename);
-        return result.profileid;
+        const user = await authModel.getUserByUsername(username);
+        if (user) {
+            return user.usertype;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Virhe käyttäjätyypin haussa:', error);
+        return null;
+    }
+}
+
+async function getProfileIdByName(username) {
+    try {
+        const user = await authModel.getProfileIdByName(username);
+        return user.profileid;
     } catch (error) {
         console.error('Virhe profiilin id:n haussa:', error);
         return { success: false, message: 'Profiilin id:n haku epäonnistui', error };
@@ -86,10 +100,12 @@ async function forgotPassword(email) {
     }
 }
 
+
 module.exports = {
     registerUser,
     loginUser,
     getProfileIdByName,
     changePassword,
-    forgotPassword
+    forgotPassword,
+    getUserTypeByUsername,
 };

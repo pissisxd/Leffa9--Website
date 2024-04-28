@@ -11,13 +11,11 @@ async function queryDatabase(query) {
 
 async function reviewFromThisUser(profileid, revieweditem, mediatype) {
   try {
-    console.log (profileid, revieweditem, mediatype);
     const query = {
       text: 'SELECT profileid, revieweditem, mediatype FROM Review_ WHERE profileid = $1 AND revieweditem = $2 AND mediatype = $3',
       values: [profileid, revieweditem, mediatype],
     };
     result = await pool.query(query);
-    console.log(result.rows);
     return result.rows.length > 0;
   } catch (error) {
     console.error('Hakuvirhe:', error);
@@ -25,12 +23,12 @@ async function reviewFromThisUser(profileid, revieweditem, mediatype) {
   }
 }
 
-async function movieReviewFromUser(profileid, mediatype, rating, review, revieweditem) {
+async function movieReviewFromUser(profileid, mediatype, rating, review, revieweditem, adult) {
 
   try {
     const query = {
-      text: 'INSERT INTO Review_ (rating, revieweditem, review, profileid, mediatype) VALUES ($1, $2, $3, $4, $5)',
-      values: [rating, revieweditem, review, profileid, mediatype],
+      text: 'INSERT INTO Review_ (rating, revieweditem, review, profileid, mediatype, adult) VALUES ($1, $2, $3, $4, $5, $6)',
+      values: [rating, revieweditem, review, profileid, mediatype, adult],
     };
     await pool.query(query);
     return true;
@@ -41,12 +39,12 @@ async function movieReviewFromUser(profileid, mediatype, rating, review, reviewe
   }
 }
 
-async function serieReviewFromUser(profileid, mediatype, rating, review, revieweditem) {
+async function serieReviewFromUser(profileid, mediatype, rating, review, revieweditem, adult) {
 
   try {
     const query = {
-      text: 'INSERT INTO Review_ (rating, revieweditem, review, profileid, mediatype) VALUES ($1, $2, $3, $4, $5)',
-      values: [rating, revieweditem, review, profileid, mediatype],
+      text: 'INSERT INTO Review_ (rating, revieweditem, review, profileid, mediatype, adult) VALUES ($1, $2, $3, $4, $5, $6)',
+      values: [rating, revieweditem, review, profileid, mediatype, adult],
     };
     await pool.query(query);
     return true;
@@ -65,8 +63,9 @@ async function getAllReviews() {
 async function getNewestReviews() {
   const query = `
       SELECT review_.*, profile_.profilename 
-      FROM review_ 
-      INNER JOIN profile_ ON review_.profileid = profile_.profileid
+      FROM review_
+      LEFT JOIN profile_ ON review_.profileid = profile_.profileid
+      WHERE review_.adult = false
       ORDER BY review_.timestamp DESC 
       LIMIT 12
   `;
@@ -145,6 +144,22 @@ async function getAnonReviews () {
     throw error;
   }
 }
+async function getReviewId(profileid, id, mediatype) {
+  try {
+    const query = {
+      text: 'SELECT idreview FROM Review_ WHERE profileid = $1 AND revieweditem = $2 AND mediatype = $3 ORDER BY timestamp DESC LIMIT 1',
+      values: [profileid, id, mediatype],
+    };
+    const result = await pool.query(query);
+    if (result.rows.length > 0) {
+      return result.rows[0].idreview; // Palauta vain idreview
+    } else {
+      return null; // Jos ei löydy arvostelua, palauta null
+    }
+  } catch (error) {
+    throw error;
+  }
+}
 
 
 module.exports = {
@@ -160,4 +175,5 @@ module.exports = {
   updateReviewToAnon, 
   getAnonReviews,
   reviewFromThisUser,
+  getReviewId
 };

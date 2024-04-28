@@ -35,9 +35,9 @@ try {
 async function movieReviewFromUser(req, res) {
   profileid = res.locals.profileid;
 
-  const { mediatype, rating, review, revieweditem } = req.body;
+  const { mediatype, rating, review, revieweditem, adult } = req.body;
 
-  const addReview = await reviewModel.movieReviewFromUser(profileid, mediatype, rating, review, revieweditem);
+  const addReview = await reviewModel.movieReviewFromUser(profileid, mediatype, rating, review, revieweditem, adult);
   if (addReview) {
     res.status(201).send('Arvostelu lisätty onnistuneesti');
   } else {
@@ -50,9 +50,9 @@ async function movieReviewFromUser(req, res) {
 async function serieReviewFromUser(req, res) {
   profileid = res.locals.profileid;
 
-  const { mediatype, rating, review, revieweditem } = req.body;
+  const { mediatype, rating, review, revieweditem, adult } = req.body;
 
-  const addReview = await reviewModel.serieReviewFromUser(profileid, mediatype, rating, review, revieweditem);
+  const addReview = await reviewModel.serieReviewFromUser(profileid, mediatype, rating, review, revieweditem, adult);
   if (addReview) {
     res.status(201).send('Arvostelu lisätty onnistuneesti');
   } else {
@@ -97,6 +97,24 @@ async function updateReview(req, res) {
 // arvostekun poistaminen reviewid:n perusteella
 async function deleteReview(req, res) {
   const id = req.params.id;
+  try {
+    await reviewModel.deleteReview(id);
+    res.send('Arvostelu poistettu onnistuneesti');
+  } catch (error) {
+    console.error('Virhe poistettaessa arvostelua:', error);
+    res.status(500).send('Virhe poistettaessa arvostelua');
+  }
+}
+
+// arvostelun poistaminen adminin toimesta
+async function adminDeleteReview(req, res) {
+  const id = req.params.id;
+  //const usertype = res.locals.usertype;
+  const usertype = res.locals.usertype;
+    if (usertype !== 'admin') {
+        return res.status(403).json({ message: 'admin voi poistaa arvostelun' });
+    }
+    
   try {
     await reviewModel.deleteReview(id);
     res.send('Arvostelu poistettu onnistuneesti');
@@ -164,6 +182,19 @@ async function getAnonReviews(req, res) {
   }
 }
 
+async function getReviewId(req, res) {
+  const profileid = req.params.profileid;
+  const id = req.params.id;
+  const mediatype = req.params.mediatype;
+  try {
+    const review = await reviewModel.getReviewId(profileid, id, mediatype);
+    res.json(review);
+  } catch (error) {
+    console.error('Virhe haettaessa arvosteluja:', error);
+    res.status(500).send('Virhe haettaessa arvosteluja');
+  }
+}
+
 module.exports = {
   getAllReviews,
   getNewestReviews,
@@ -178,4 +209,6 @@ module.exports = {
   getAnonReviews,
   movieReviewFromThisUser,
   serieReviewFromThisUser,
+  adminDeleteReview,
+  getReviewId
 };

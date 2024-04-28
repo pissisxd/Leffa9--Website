@@ -36,13 +36,13 @@ const with_genres_Series = {
     "drama": 18,
     "family": 10751,
     "kids": 10762,
-    "fantasy": 14,
+    "fantasy": 10765,
     "history": 36,
     "horror": 27,
     "music": 10402,
     "mystery": 9648,
     "romance": 10749,
-    "science fiction": 878,
+    "science fiction": 10765,
     "tv": 10770,
     "thriller": 53,
     "war": 10768,
@@ -50,7 +50,7 @@ const with_genres_Series = {
     "news": 10763,
     "reality": 10764,
     "soap": 10766,
-    "talk": 10767,
+    "talk": 10767
 };
 
 function setUndefinedToEmptyStrings(param) {
@@ -63,9 +63,13 @@ function setUndefinedToEmptyStrings(param) {
 
 // Etsi elokuvia hakutermin perusteella
 async function searchMovies(req, res) {
-    const { query, page, year, language } = req.query;
+    const { query, page, year, adult } = req.query;
     const apiKey = process.env.TMDB_API_KEY;
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}&page=${page}&year=${year}&language=${language}`;
+    console.log(req.query);
+    const includeAdult = adult === 'true' ? '&include_adult=true' : '&include_adult=false';
+
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}&page=${page}&year=${year}${includeAdult}`;
+    console.log(url);
 
     try {
         const response = await axios.get(url);
@@ -74,7 +78,8 @@ async function searchMovies(req, res) {
             result.id,
             result.title,
             result.poster_path,
-            result.overview
+            result.overview,
+            result.adult
         )).filter(movie => movie.poster_path !== null);
         res.json(movies);
     } catch (error) {
@@ -85,7 +90,7 @@ async function searchMovies(req, res) {
 
 // Etsi elokuvia erilaisilla parametreilla, kuten suosituimmuuden perusteella
 async function discoverMovies(req, res) {
-    const { sort_by, page, year, language, genre } = req.query;
+    const { sort_by, page, year, language, genre, adult } = req.query;
     const apiKey = process.env.TMDB_API_KEY;
     let genreId = '';
 
@@ -110,7 +115,7 @@ async function discoverMovies(req, res) {
     console.log('language:', paramLanguage);
     console.log('genre:', genre);
 
-    const url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&sort_by=${paramSort_by}&page=${paramPage}&primary_release_year=${paramYear}&language=${paramLanguage}`;
+    const url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&sort_by=${paramSort_by}&page=${paramPage}&primary_release_year=${paramYear}&language=${paramLanguage}&include_adult=${adult}`;
 
     try {
         const response = await axios.get(url);
@@ -162,10 +167,9 @@ async function getMovieProvidersbyId(req, res) {
             // Jos koodi on saatavilla, palautetaan sen tiedot
             const countryData = movieData.results[countryCode];
             res.json(countryData);
-        } else {
-            // Jos koodia ei ole saatavilla, annetaan virheilmoitus
-            res.status(404).json({ message: `Ei tietoja saatavilla maasta ${countryCode}` });
         }
+            
+
  
     } catch (error) {
         console.error('Virhe elokuvan hakemisessa:', error);
@@ -175,10 +179,11 @@ async function getMovieProvidersbyId(req, res) {
 
 // Lisää tv-sarjojen hakutoiminto
 async function searchTvShows(req, res) {
-    const { query, page, year, language } = req.query;
-    const apiKey = process.env.TMDB_API_KEY;
-    const url = `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${query}&page=${page}&year=${year}&language=${language}`;
 
+    
+    const { query, page, year, language, adult } = req.query;
+    const apiKey = process.env.TMDB_API_KEY;
+    const url = `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${query}&page=${page}&year=${year}&language=${language}&include_adult=${adult}`;
     try {
         const response = await axios.get(url);
         const data = response.data;
@@ -197,7 +202,7 @@ async function searchTvShows(req, res) {
 
 // Etsi tv-sarjoja erilaisilla parametreilla
 async function discoverTvShows(req, res) {
-    const { sort_by, page, year, language, genre } = req.query;
+    const { sort_by, page, year, language, genre, adult } = req.query;
     const apiKey = process.env.TMDB_API_KEY;
     let genreId = '';
 
@@ -222,7 +227,7 @@ async function discoverTvShows(req, res) {
     console.log('language:', paramLanguage);
     console.log('genre:', genre);
 
-    const url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&with_genres=${genreId}&sort_by=${paramSort_by}&page=${paramPage}&first_air_date_year=${paramYear}&language=${paramLanguage}`;
+    const url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&with_genres=${genreId}&sort_by=${paramSort_by}&page=${paramPage}&first_air_date_year=${paramYear}&language=${paramLanguage}&include_adult=${adult}`;
 
     try {
         const response = await axios.get(url);
@@ -274,12 +279,34 @@ async function getTvShowProvidersbyId(req, res) {
             // Jos koodi on saatavilla, palautetaan sen tiedot
             const countryData = seriesData.results[countryCode];
             res.json(countryData);
-        } else {
-            // Jos koodia ei ole saatavilla, annetaan virheilmoitus
-            res.status(404).json({ message: `Ei tietoja saatavilla maasta ${countryCode}` });
-        }
+        } 
+        
     } catch (error) {
         console.error('Virhe tv-sarjan hakemisessa:', error);
+        res.status(500).json({ message: 'Virhe palvelimella' });
+    }
+}
+
+async function getRandomBackdrop(req, res) {
+    const apiKey = process.env.TMDB_API_KEY;
+    const randomNumber = Math.floor(Math.random() * Object.keys(with_genres).length);
+    const genre = Object.keys(with_genres)[randomNumber];
+
+    const url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${with_genres[genre]}&sort_by=popularity.desc`;
+
+    try {
+        const response = await axios.get(url);
+        const data = response.data;
+        const randomMovie = data.results[Math.floor(Math.random() * data.results.length)];
+        const backdropPath = randomMovie.backdrop_path;
+        
+        if (backdropPath) {
+            const backdropUrl = `https://image.tmdb.org/t/p/original${backdropPath}`;
+            res.json({ backdropUrl });
+        } else {
+            res.status(404).json({ message: 'Ei taustakuvaa saatavilla' });
+        }
+    } catch (error) {
         res.status(500).json({ message: 'Virhe palvelimella' });
     }
 }
@@ -292,7 +319,6 @@ module.exports = {
     searchTvShows,
     discoverTvShows,
     getTvShowById,
-    getTvShowProvidersbyId
+    getTvShowProvidersbyId,
+    getRandomBackdrop
 };
-
-

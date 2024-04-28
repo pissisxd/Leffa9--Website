@@ -4,8 +4,6 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
-
-
 const GroupList = ({ profile }) => {
   const [groups, setGroups] = useState([]);
 
@@ -41,13 +39,13 @@ const GroupList = ({ profile }) => {
       <ul className="pagination">
         <li>
           <button className="buttonnext" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}>
-            ⯇
+            &#9664;
           </button>
           &nbsp; <span className="communityinfo">selaa</span> &nbsp;
           <button className="buttonnext" onClick={() =>
             setCurrentPage(currentPage < Math.ceil(groups.length / groupsPerPage) ?
               currentPage + 1 : Math.ceil(groups.length / groupsPerPage))}>
-            ⯈
+            &#9654;
           </button>
         </li>
       </ul>

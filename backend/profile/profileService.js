@@ -42,6 +42,17 @@ async function deleteProfileById(req, res) {
     }
 }
 
+async function deleteProfileAsAdmin(req, res) {
+    const profileid = req.params.id;
+    try {
+        await profileModel.deleteProfileById(profileid);
+        res.status(200).json({ message: `Tietue poistettu onnistuneesti` });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+
 async function updateProfilenameAndEmail(req, res) {
     const profileid = res.locals.profileid;
     const { profilename, email } = req.body;
@@ -75,6 +86,17 @@ async function updateProfileVisibility(req, res) {
     }
 }
 
+async function updateProfileAdultcontent(req, res) {
+    const profileid = res.locals.profileid;
+    const { adult } = req.body;
+    try {
+        await profileModel.updateProfileAdultcontent(profileid, adult);
+        res.status(200).json({ message: `Tietue päivitetty onnistuneesti` });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
     getAllProfiles,
     getProfileById,
@@ -82,5 +104,7 @@ module.exports = {
     deleteProfileById,
     updateProfilenameAndEmail,
     updateProfileDetails,
-    updateProfileVisibility
+    updateProfileVisibility,
+    deleteProfileAsAdmin,
+    updateProfileAdultcontent
 };

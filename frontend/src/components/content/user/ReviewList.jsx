@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import './user.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { getHeaders } from '@auth/token';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
-
-const ReviewList = ({ profile }) => {
+const ReviewList = ({ user, profile }) => {
 
   const [reviews, setReviews] = useState([]);
   const [editReviewId, setEditReviewId] = useState(null);
@@ -16,12 +16,31 @@ const ReviewList = ({ profile }) => {
   const [reviewsPerPage, setReviewsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [adult, setAdult] = useState(false);
   const isOwnProfile = profile && profile.isOwnProfile;
+  const headers = getHeaders();
+
+  
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user !== null && user.user !== null)
+        try {
+            const response = await axios.get(`${VITE_APP_BACKEND_URL}/profile/${user.user}`, { headers });
+
+            setAdult(response.data.adult);
+
+        } catch (error) {
+            console.error('Virhe haettaessa profiilitietoja:', error);
+        }
+    };
+
+    fetchProfile();
+    }, 
+  [user]);
 
 
   const fetchReviews = async () => {
     try {
-      if (profile && profile.profileid) {
 
         const response = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/profile/${profile.profileid}`);
         const reviewData = response.data;
@@ -52,7 +71,7 @@ const ReviewList = ({ profile }) => {
 
         const sortedReviews = reviewsWithMovies.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         setReviews(reviewsWithMovies, sortedReviews);
-      }
+      
     } catch (error) {
       console.error('Hakuvirhe:', error);
     }
@@ -62,20 +81,9 @@ const ReviewList = ({ profile }) => {
     fetchReviews();
   }, [profile]);
 
-  {/*const handleDeleteReview = async (idreview) => {
-      try {
-        const response = await axios.delete(`${VITE_APP_BACKEND_URL}/review/${idreview}`);
-        console.log(response.data);
-        setReviews(reviews.filter(review => review.idreview !== idreview));
-      } catch (error) {
-        console.error('Poistovirhe:', error);
-      }
-    };*/}
-
   const handleConfirmDelete = async (idreview) => {
     try {
       const response = await axios.delete(`${VITE_APP_BACKEND_URL}/review/${idreview}`);
-      console.log(response.data);
       setReviews(reviews.filter(review => review.idreview !== idreview));
       setConfirmDeleteId(null);
     } catch (error) {
@@ -89,7 +97,7 @@ const ReviewList = ({ profile }) => {
 
   const handleUpdateReview = async (idreview) => {
     try {
-      const response = await axios.put(`${VITE_APP_BACKEND_URL}/reviews/update/${idreview}`, updatedReview);
+      const response = await axios.put(`${VITE_APP_BACKEND_URL}/reviews/update/${idreview}`, updatedReview, { headers });
       setEditReviewId(null);
       fetchReviews();
     } catch (error) {
@@ -146,18 +154,20 @@ const ReviewList = ({ profile }) => {
         <ul className="pagination">
           <li>
             <button className="buttonnext" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}>
-              ⯇
+              &#9664;
             </button>
             &nbsp; <span className="communityinfo">selaa</span> &nbsp;
             <button className="buttonnext" onClick={() => setCurrentPage(currentPage < Math.ceil(filteredReviews.length / reviewsPerPage) ? currentPage + 1 : Math.ceil(filteredReviews.length / reviewsPerPage))}>
-              ⯈
+              &#9654;
             </button>
           </li>
         </ul>
 
         <hr />
 
-        {currentReviews.map((review, index) => (
+        {currentReviews
+        .filter(review => review.adult === false || adult === true)
+        .map((review, index) => (
           <li className='minheight' key={index}>
             {review.mediatype === 0 ? (
             <Link to={`/movie/${review.revieweditem}`}><img className='reviewimg' src={`https://image.tmdb.org/t/p/w342${review.movie.poster_path}`} alt={review.movie.title} /></Link>
@@ -211,7 +221,6 @@ const ReviewList = ({ profile }) => {
           </li>
         ))}
       </ul>
-
     </>
   );
 }

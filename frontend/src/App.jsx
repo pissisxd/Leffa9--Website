@@ -13,7 +13,6 @@ import Home from '@content/homepage/Home';
 import Login from '@components/header/Login';
 import MyAccount from '@content/user/MyAccount';
 import ProfileDetails from '@content/user/ProfileDetails';
-import Search from '@content/movies/Search';
 import MovieDetails from '@content/movies/MovieDetails';
 import GroupDetails from '@content/group/GroupDetails';
 import SeriesDetails from '@content/movies/SeriesDetails';
@@ -23,16 +22,18 @@ import AllGroups from '@content/community/AllGroups';
 import AllReviews from '@content/community/AllReviews';
 import Error from '@content/error/Error';
 import ProfileEdit from '@content/user/ProfileEdit';
-import ReviewForm from '@content/movies/ReviewForm';
+import AdminPage from '@content/admin/AdminPage';
+import Events from '@content/events/Events';
 import Faq from '@content/faq/Faq';
-import { jwtToken } from './components/auth/authSignal';
-import FavoriteList from '@content/user/FavoriteList';
+import Intro from '@content/faq/intro';
+import { jwtToken, usertype } from './components/auth/authSignal';
+import Movies from '@content/movies/Movies';
+import Favorites from '@content/user/Favorites';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
-
 
 function App() {
   const { theme, toggleTheme } = useTheme();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null);
   const [showLogin, setShowLogin] = useState(false);
   const [isburgerOpen, setIsburgerOpen] = useState(false);
 
@@ -49,7 +50,6 @@ function App() {
       }
 
     };
-
 
     document.body.addEventListener('click', handleClickOutside);
 
@@ -86,6 +86,7 @@ function App() {
           setUser(null);
           localStorage.removeItem('user');
           jwtToken.value = '';
+          usertype.value = '';
           window.location.href = '/';
         } else {
           console.error('Uloskirjautuminen epäonnistui');
@@ -107,9 +108,9 @@ function App() {
             <Header user={user} setUser={handleLogin} handleLogout={handleLogout} toggleTheme={toggleTheme} theme={theme} showLogin={showLogin} setShowLogin={setShowLogin} isburgerOpen={isburgerOpen} setIsburgerOpen={setIsburgerOpen} />
             <Routes>
               <Route path="/" exact element={<Home />} />
-              <Route path="/search" element={<Search />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/search" element={<Movies user={user}/>} />
               <Route path="/movie/:id" element={<MovieDetails user={user}/>} />
-              {/*<Route path="/movie/:id/review" element={<ReviewForm user={user}/>} />*/}
               <Route path="/series/:id" element={<SeriesDetails user={user}/>} />
               <Route path="/login" element={<Login setUser={handleLogin} />} />
               <Route path="/myaccount" element={<MyAccount user={user} />} />
@@ -118,10 +119,12 @@ function App() {
               <Route path="/community" element={<Community user={user} />} />
               <Route path="/users" element={<UserList />} />
               <Route path="/groups" element={<AllGroups />} />
-              <Route path="/reviews" element={<AllReviews />} />
+              <Route path="/reviews" element={<AllReviews usertype={usertype} />} />
               <Route path="/about" element={<Faq />} />
               <Route path="/group/:id" element={<GroupDetails user={user} />} />
-              {/* ja loput puuttuvat routet myös */}
+              <Route path="/admin" element={<AdminPage user={user} usertype={usertype} />} />
+              <Route path="/intro" element={<Intro />} />
+              <Route path="/favorites/:profilename" element={<Favorites user={user}/>} />
             </Routes>
 
           </div>

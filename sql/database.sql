@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS Memberlist_ CASCADE;
 DROP TABLE IF EXISTS Message_ CASCADE;
 DROP TABLE IF EXISTS Profile_ CASCADE;
 DROP TABLE IF EXISTS Review_ CASCADE;
+DROP TABLE IF EXISTS Event_ CASCADE;
 
 -- Käyttäjät
 CREATE TABLE IF NOT EXISTS Profile_
@@ -20,7 +21,9 @@ CREATE TABLE IF NOT EXISTS Profile_
     profilepicurl VARCHAR(400),
     is_private BOOLEAN DEFAULT FALSE, 
     timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    description VARCHAR(1000)
+    description VARCHAR(1000),
+    usertype VARCHAR(10) DEFAULT 'user' CHECK (usertype IN ('admin', 'user')),
+    adult BOOLEAN DEFAULT FALSE
 );
 
 -- Ryhmät
@@ -29,8 +32,9 @@ CREATE TABLE IF NOT EXISTS Group_
     groupid SERIAL PRIMARY KEY,
     groupname VARCHAR(255) UNIQUE NOT NULL,
     groupexplanation VARCHAR(1000),
-    timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    grouppicurl TEXT
+    grouppicurl TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_modified TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Ryhmien jäsenet ja omistajat
@@ -43,7 +47,8 @@ CREATE TABLE IF NOT EXISTS Memberlist_
     pending INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (profileid) REFERENCES Profile_(profileid) ON DELETE CASCADE,
     FOREIGN KEY (groupid) REFERENCES Group_(groupid) ON DELETE CASCADE,
-    CONSTRAINT unique_userInGroup UNIQUE (profileid, groupid)
+    CONSTRAINT unique_userInGroup UNIQUE (profileid, groupid),
+    join_timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Viestit (ryhmäkohtaiset)
@@ -59,16 +64,19 @@ CREATE TABLE IF NOT EXISTS Message_
 );
 
 -- Suosikkilistaukset
-CREATE TABLE IF NOT EXISTS Favoritelist_
-(
+CREATE TABLE IF NOT EXISTS Favoritelist_ (
     idfavoritelist SERIAL PRIMARY KEY,
     profileid INTEGER,
     groupid INTEGER,
-    favoriteditem TEXT,
-    showtime TEXT,
+    favoriteditem VARCHAR(40),
+    mediatype SMALLINT,
+    userfavorites INTEGER DEFAULT 1,
+    adult BOOLEAN DEFAULT FALSE,
     timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (profileid) REFERENCES Profile_(profileid) ON DELETE CASCADE,
-    FOREIGN KEY (groupid) REFERENCES Group_(groupid) ON DELETE CASCADE
+    FOREIGN KEY (groupid) REFERENCES Group_(groupid) ON DELETE CASCADE,
+    CONSTRAINT unique_fav_group UNIQUE (groupid, favoriteditem, mediatype),
+    CONSTRAINT unique_fav_profile UNIQUE (profileid, mediatype, favoriteditem)
 );
 
 -- Arvostelut
@@ -80,9 +88,19 @@ CREATE TABLE IF NOT EXISTS Review_ (
     rating SMALLINT NOT NULL,
     timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     mediatype SMALLINT,
+    adult BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (profileid) REFERENCES Profile_(profileid) ON DELETE CASCADE,
     CONSTRAINT unique_review UNIQUE NULLS DISTINCT (profileid, revieweditem, mediatype),
     CONSTRAINT check_rating_range CHECK (rating >= 1 AND rating <= 5)
+);
+
+CREATE TABLE IF NOT EXISTS Event_
+(
+    eventid SERIAL PRIMARY KEY,
+    groupid INTEGER NOT NULL,
+    event_info JSON NOT NULL,
+    exp_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    FOREIGN KEY (groupid) REFERENCES Group_(groupid) ON DELETE CASCADE
 );
 
 ALTER SEQUENCE public.profile__profileid_seq RESTART WITH 1;
@@ -91,14 +109,4 @@ ALTER SEQUENCE public.review__idreview_seq RESTART WITH 1;
 ALTER SEQUENCE public.favoritelist__idfavoritelist_seq RESTART WITH 1;
 ALTER SEQUENCE public.memberlist__memberlistid_seq RESTART WITH 1;
 ALTER SEQUENCE public.message__messageid_seq RESTART WITH 1;
-
---ALTER TABLE Review_ 
---DROP CONSTRAINT unique_review,
---ADD CONSTRAINT unique_review UNIQUE NULLS DISTINCT (profileid, revieweditem, mediatype);
-
-ALTER TABLE Group_ 
-ALTER COLUMN timestamp SET DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN last_modified TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE Memberlist_
-ADD COLUMN join_timestamp TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+ALTER SEQUENCE public.event__eventid_seq RESTART WITH 1;

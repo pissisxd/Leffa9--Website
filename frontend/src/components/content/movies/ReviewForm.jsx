@@ -6,12 +6,20 @@ const { VITE_APP_BACKEND_URL } = import.meta.env;
 const ReviewForm = ({ movieId, user }) => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewButton, setNewReviewButton] = useState(true);
+  const [actionForm, setShowActionForm] = useState(false);
+  const [editButton, setEditButton] = useState(true);
   const [profileHasReview, setProfileHasReview] = useState(true); 
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
-  const headers = getHeaders();
+  const [movieAdult, setMovieAdult] = useState(true); // Asetetaan oletusarvoksi true
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [editReviewId, setEditReviewId] = useState(null); 
+  const [ReviewId, setReviewId] = useState(null);  
+  const [updatedReview, setUpdatedReview] = useState({
+    review: '', rating: 0
+  });
 
-  console.log("user", user === null, user.user);
+  const headers = getHeaders();
 
  if (user.user !== null) {
     useEffect(() => {
@@ -21,6 +29,10 @@ const ReviewForm = ({ movieId, user }) => {
             `${VITE_APP_BACKEND_URL}/moviereviews/thisuser/${movieId}`,
             { headers }
           );
+          const reviewResponse = await axios.get(
+            `${VITE_APP_BACKEND_URL}/review/${user.user.profileid}/${movieId}/0`
+          );    
+          setReviewId(reviewResponse.data);
           setProfileHasReview(response.data);
         } catch (error) {
           console.error("Virhe arvostelun tarkistuksessa:", error);
@@ -29,7 +41,17 @@ const ReviewForm = ({ movieId, user }) => {
       checkIfUserHasReview();
     }, [movieId]);
   }
-  
+  useEffect(() => {
+    const fetchMovie = async () => {
+      try {
+        const response = await axios.get(`${VITE_APP_BACKEND_URL}/movie/${movieId}`);
+        setMovieAdult(response.data.adult); // Asetetaan elokuvan adult-arvo
+      } catch (error) {
+        console.error('Hakuvirhe:', error);
+      }
+    };
+    fetchMovie();
+  }, [movieId]);
 
   const closeReviewForm = () => {
     setShowReviewForm(false);
@@ -39,6 +61,20 @@ const ReviewForm = ({ movieId, user }) => {
   const openReviewForm = () => {
     setShowReviewForm(true);
     setNewReviewButton(false);
+  }
+
+  const handleReviewEdit = (idreview) => {
+    setEditReviewId(idreview);
+  };
+
+  const handleCancelEdit = () => {
+    setEditReviewId(null);
+    setConfirmDeleteId(null);
+    setUpdatedReview({ review: '', rating: 0 });
+  };
+
+  const handleCancelDelete = () => { 
+    setConfirmDeleteId(null);
   }
 
   const handleSubmit = async (event) => {
@@ -51,6 +87,7 @@ const ReviewForm = ({ movieId, user }) => {
           review,
           mediatype: '0',
           revieweditem: `${movieId}`,
+          adult: `${movieAdult}`,
         }, { headers }
       );
       window.location.reload();
@@ -59,8 +96,43 @@ const ReviewForm = ({ movieId, user }) => {
     }
   }
 
-  console.log("profileHasReview", profileHasReview);
-  
+  const handleUpdateReview = async () => {
+    try {
+      const response = await axios.put(`${VITE_APP_BACKEND_URL}/reviews/update/${ReviewId}`, updatedReview, { headers });
+      setEditReviewId(null);
+      
+      window.location.reload();
+    } catch (error) {
+      console.error('Muokkausvirhe:', error);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      const deleteresponse = await axios.delete(`${VITE_APP_BACKEND_URL}/review/${ReviewId}`);
+      setConfirmDeleteId(null);
+      window.location.reload();
+    } catch (error) {
+      console.error('Poistovirhe:', error);
+    }
+  };
+
+  const setUpdateRating = (e) => {
+    const newRating = e.target.value;
+    setUpdatedReview(prevState => ({
+      ...prevState,
+      rating: newRating
+    }));
+  };
+
+  const setUpdateReview = (e) => {
+    const newReview = e.target.value;
+    setUpdatedReview(prevState => ({
+      ...prevState,
+      review: newReview
+    }));
+  };
+
   return (
     <div>
       {user.user !== null && !profileHasReview && ( 
@@ -96,7 +168,7 @@ const ReviewForm = ({ movieId, user }) => {
                 required
               ></textarea>
             </p>
-            <button onClick={handleSubmit} disabled={rating < 1 || rating > 5} className='basicbutton'>Lähetä arvostelu</button>
+            <button onClick={handleSubmit} disabled={rating < 1 || rating > 5 } className='basicbutton'>Lähetä arvostelu</button>
             <button onClick={closeReviewForm} className="basicbutton">Peruuta</button>
           </div>
         )
@@ -104,6 +176,35 @@ const ReviewForm = ({ movieId, user }) => {
       {user.user !== null && !profileHasReview && ( newReviewButton && (
         <button onClick={openReviewForm} className="basicbutton">Luo uusi arvostelu</button>
       ))}
+    {user.user !== null && profileHasReview && editReviewId === null && ( editButton && (
+        <button onClick={() => handleReviewEdit(review.idreview)} className="basicbutton"><span className="review uni11"></span>&nbsp; Muokkaa arvostelua</button>
+      ))}
+      
+               {editReviewId === review.idreview && (
+              <div className="edit-review">
+                <b>Tähdet välillä 1-5</b> <br />
+                <input className='updateRating' type="number" min="1" max="5" value={updatedReview.rating} onChange={setUpdateRating} /> <br />
+                <b>Kommentti</b> <br />
+                <textarea className="updateReview" value={updatedReview.review} onChange={setUpdateReview} /> <br />
+                <button className="compactButton" onClick={() => handleUpdateReview(review.idreview)}><span className='review uni13'></span> Tallenna muutokset</button>
+                <button className="compactButton" onClick={() => handleCancelEdit()}>Peruuta muutokset</button>
+                {confirmDeleteId === review.idreview ? (
+                  <>
+                    <button className="confirm" onClick={() => handleConfirmDelete()}><span className='review uni12'></span> Vahvista</button>
+                    <button className="compactButton" onClick={() => handleCancelDelete()} >Peruuta</button>
+   
+                  </>
+                ) : (
+                  <>
+                  <button className="compactButton" onClick={() => setConfirmDeleteId()}><span className='review uni12'></span> Poista arvostelu</button>
+                  
+                  </>
+                )}
+
+              </div>
+            )}
+
+
     </div>
   );
 };

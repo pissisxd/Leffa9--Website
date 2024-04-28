@@ -1,16 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import './community.css';
+import AdminDeleteReview from '@content/admin/AdminDeleteReview';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { getHeaders } from '@auth/token';
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
-
-const AllReviews = ({ searchTerm, setSearchTerm }) => {
+const AllReviews = ({ searchTerm, setSearchTerm, user }) => {
 
   const [reviews, setReviews] = useState([]);
-  const [reviewsPerPage, setReviewsPerPage] = useState(4);
+  const [reviewsPerPage, setReviewsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [adult, setAdult] = useState(false);
+  const headers = getHeaders()
+
+
+  useEffect(() => {
+    
+    const fetchProfile = async () => {
+      if (user.user !== null || user.user !== undefined) {
+
+      const profresponse = await axios.get(`${VITE_APP_BACKEND_URL}/profile/${user.user.user}`, { headers });
+      setAdult(profresponse.data.adult);
+
+      }
+
+      fetchProfile();
+    };
+  
+  
+  }, [user]);
 
   useEffect(() => {
     fetchReviews();
@@ -19,12 +39,8 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
   const fetchReviews = async () => {
     try {
       const newReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/reviews`);
-      //const anonReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/anon`);
       
       const newReviews = newReviewResponse.data;
-      //const anonReviews = anonReviewResponse.data;
-      
-      //const reviewData = [...newReviews, ...anonReviews];
 
       const reviewData = newReviews;
 
@@ -43,7 +59,6 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
           return review;
         }
       }));
-
 
       const reviewsWithMovies = await Promise.all(reviewsWithProfiles.map(async review => {
         try {
@@ -85,16 +100,22 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
   };
+  
+  const handleDelete = async (idreview) => {
+      setReviews(reviews.filter(review => review.idreview !== idreview));
+  };
 
   const filteredReviews = reviews.filter(review =>
-    review.review.toLowerCase().includes(searchTerm.toLowerCase())
+    review.review.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (review.userProfile && review.userProfile.profilename && review.userProfile.profilename.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (review.movie && review.movie.title && review.movie.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (review.movie && review.movie.name && review.movie.name.toLowerCase().includes(searchTerm.toLowerCase())) 
   );
 
   const indexOfLastReview = currentPage * reviewsPerPage;
   const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
   const currentReviews = filteredReviews.slice(indexOfFirstReview, indexOfLastReview);
 
-  
   return (
     <div className='allreviews'>
       <ul className="review-list">
@@ -109,22 +130,28 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
               on <b>{reviews.length > 0 && (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)}</b>.<br />
               Voit luoda uusia arvosteluja elokuvien ja sarjojen sivuilta. <br />
             </li>
-  
-            <ul className="pagination">
-              <li>
-                <button className="buttonnext" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}>
-                  ⯇
-                </button>
-                &nbsp; <span className="communityinfo">selaa</span> &nbsp;
-                <button className="buttonnext" onClick={() => setCurrentPage(currentPage < Math.ceil(filteredReviews.length / reviewsPerPage) ? currentPage + 1 : Math.ceil(filteredReviews.length / reviewsPerPage))}>
-                  ⯈
-                </button>
-              </li>
-            </ul>
+
+            {reviews.length > reviewsPerPage && (
+              <ul className="pagination">
+
+                  <li>
+                      <input className='longInput' type="text" placeholder="Etsi ..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} />
+
+                      <button className="buttonnext justMargin" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}>
+                    &#9664; </button>
+                    &nbsp; <span className="communityinfo">sivu {currentPage} / {Math.ceil(filteredReviews.length / reviewsPerPage)}</span> &nbsp;
+                    <button className="buttonnext" onClick={() => setCurrentPage(currentPage < Math.ceil(filteredReviews.length / reviewsPerPage) ? currentPage + 1 : Math.ceil(filteredReviews.length / reviewsPerPage))}>
+                      &#9654; </button>
+
+                  </li>
+              </ul>
+            )}
   
             <hr />
   
-            {currentReviews.map((review, index) => (
+            {currentReviews
+            .filter(review => review.adult === false || adult === true)
+            .map((review, index) => (
               <li className='minheightrews' key={index}>
                 {review.mediatype === 0 ? (
                   <Link to={`/movie/${review.revieweditem}`}>
@@ -161,6 +188,9 @@ const AllReviews = ({ searchTerm, setSearchTerm }) => {
                   )}
                 </span><br />
                 <span className='userinfo'>{review.review}</span> <br />
+                {user.user !== null && user.user.usertype === 'admin' && (
+                  <AdminDeleteReview id={review.idreview} handleDelete={handleDelete} />
+                )}
               </li>
             ))}
           </>

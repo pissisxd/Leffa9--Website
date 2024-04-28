@@ -4,22 +4,18 @@ import { Link } from 'react-router-dom';
 import './Homepage.css'; // Sisällytä CSS-tiedosto suoraan komponenttiin
 const { VITE_APP_BACKEND_URL } = import.meta.env;
 
-
 const Latestreviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const newReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/review/new`);
-        const anonReviewResponse = await axios.get(`${VITE_APP_BACKEND_URL}/reviews/anon`);
         
         const newReviews = newReviewResponse.data;
-        const anonReviews = anonReviewResponse.data;
         
-        const allReviews = [...newReviews, ...anonReviews];
+        const allReviews = [...newReviews];
 
         // Hae jokaisen arvostelun review.revieweditem arvolla liittyvä elokuva
         const reviewsWithMovies = await Promise.all(allReviews.map(async review => {
@@ -54,8 +50,6 @@ const Latestreviews = () => {
 
     fetchReviews();
   }, []);
-
-
 
   return (
     <>
@@ -99,7 +93,11 @@ const Latestreviews = () => {
                   </td>
                   
                   <td className="review-info">
+                  {review.mediatype === 0 ? (
                     <h2><Link to={`/movie/${review.revieweditem}`} className="titleHover">{review.data.title}{review.data.name}</Link></h2>
+                    ) : (
+                    <h2><Link to={`/series/${review.revieweditem}`} className="titleHover">{review.data.title}{review.data.name}</Link></h2>
+                    )}
                     <p><b>Arvostelu: </b> {review.review}</p>
                     <p><b>Arvosteltu: </b>{new Date(review.timestamp).toLocaleString('fi-FI', {
                       day: 'numeric',
