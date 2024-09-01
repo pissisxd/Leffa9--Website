@@ -133,7 +133,7 @@ const GroupDetails = ({ user }) => {
               // Tarkistetaan, onko muita pääkäyttäjiä ryhmässä
               const otherMainUsers = groupMembers.filter(member => member.mainuser === 1 && member.profileid !== profileId);
               
-              if (otherMainUsers.length > 0) {
+              if (otherMainUsers.length > 1) {
                 // Jos muita pääkäyttäjiä on, poistetaan käyttäjä ryhmästä
                 await axios.delete(`${VITE_APP_BACKEND_URL}/memberstatus/${memberResponse.data.memberlistid}`, {headers});
                 window.location.reload();
@@ -196,7 +196,7 @@ const GroupDetails = ({ user }) => {
                 />
 
                 {(isAdmin || isMainuser && !editMode) && <button onClick={() => setEditMode(true)} className="basicbutton">Muokkaa ryhmää</button>}
-                {(!isMember && !isPending && user && user.user !== null && user.user !== undefined) && (
+                {(!loading && !isMember && !isPending && user && user.user !== null && user.user !== undefined) && (
                   <button className="basicbutton" onClick={() => handleApplicationToJoin(profileId, id)}>Liittymispyyntö</button>
                 )}
                 {isPending && (
